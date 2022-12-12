@@ -2,9 +2,9 @@ import numpy as np
 from torch import nn, Tensor
 import torch
 from torch.distributions import Distribution, Exponential, Cauchy, HalfCauchy, Normal
-from gmfpp.models.PrintSize import *
+from models.PrintSize import *
 from typing import List, Set, Dict, Tuple, Optional, Any
-from gmfpp.models.ReparameterizedDiagonalGaussian import ReparameterizedDiagonalGaussian
+from models.ReparameterizedDiagonalGaussian import ReparameterizedDiagonalGaussian
 
 class CytoVariationalAutoencoder_nonvar(nn.Module):
  

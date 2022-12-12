@@ -1,4 +1,4 @@
-from gmfpp.utils.data_preparation import *
+from utils.data_preparation import *
 
 metadata = read_metadata("./data/all/metadata.csv")
 metadata = drop_redundant_metadata_columns(metadata)

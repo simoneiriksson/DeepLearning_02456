@@ -2,11 +2,11 @@ from gmfpp.models.CytoVariationalAutoencoder import *
 from typing import List, Set, Dict, Tuple, Optional, Any
 from collections import defaultdict
 
-from gmfpp.models.CytoVariationalAutoencoder import CytoVariationalAutoencoder
-from gmfpp.models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar
-from gmfpp.models.VariationalAutoencoder import VariationalAutoencoder
-from gmfpp.models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
-from gmfpp.models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
+from models.CytoVariationalAutoencoder import CytoVariationalAutoencoder
+from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar
+from models.VariationalAutoencoder import VariationalAutoencoder
+from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
+from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
 
 def LoadVAEmodel(folder, model_type=None, device="cpu"):
     validation_data = torch.load(folder + "validation_data.pt", map_location=torch.device(device))

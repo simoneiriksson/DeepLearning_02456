@@ -5,7 +5,7 @@ Created on Sat Nov 19 12:40:14 2022
 @author: JUCA
 """
 
-from gmfpp.utils.data_preparation import *
+from utils.data_preparation import *
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

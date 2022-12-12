@@ -1,7 +1,7 @@
 import numpy as np
 from torch import nn, Tensor
 import torch
-import gmfpp.models.ReparameterizedDiagonalGaussian
+import models.ReparameterizedDiagonalGaussian
 from torch.distributions import Distribution, Normal
 from typing import List, Set, Dict, Tuple, Optional, Any
 
