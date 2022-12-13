@@ -47,6 +47,7 @@ cprint(f"Using device: {device}", logfile)
 path = get_server_directory_path()
 #path = "data/all/"
 
+#if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
 metadata = read_metadata(path + "metadata.csv")
 metadata = metadata[:100]
 cprint("loaded metadata",logfile)
@@ -54,8 +55,10 @@ cprint("loaded metadata",logfile)
 cprint("loading images", logfile)
 relative_paths = get_relative_image_paths(metadata)
 image_paths = [path + relative for relative in relative_paths]
-images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
-#images = torch.load("images.pt")
+#images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
+images = torch.load("images.pt")
+create_directory('../data/')
+torch.save(images, '../data/images.pt')
 mapping = get_MOA_mappings(metadata)
 cprint("loaded images", logfile)
 normalize_channels_inplace(images)
@@ -75,7 +78,7 @@ cprint("VAE Configs", logfile)
 # start another training session
 vae, validation_data, training_data, VAE_settings = initVAEmodel(latent_features= 256,
                                                                     beta = 0.5,
-                                                                    num_epochs = 100,
+                                                                    num_epochs = 10,
                                                                     batch_size = min(64, len(train_set)),
                                                                     learning_rate = 1e-3,
                                                                     weight_decay = 1e-3,
