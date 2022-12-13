@@ -1,4 +1,4 @@
-from gmfpp.models.CytoVariationalAutoencoder import *
+from models.CytoVariationalAutoencoder import *
 from typing import List, Set, Dict, Tuple, Optional, Any
 from collections import defaultdict
 

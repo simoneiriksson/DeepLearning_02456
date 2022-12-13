@@ -4,7 +4,7 @@ import pandas as pd
 from typing import List, Set, Dict, Tuple, Optional, Any
 from collections import defaultdict
 
-from gmfpp.utils.data_preparation import *
+from utils.data_preparation import *
 
 def extract_batch_from_indices(indices: np.ndarray, images: torch.Tensor, metadata: pd.DataFrame) -> Tuple[torch.Tensor, torch.Tensor]:
     batch_images = extract_images_from_metadata_indices(indices, images)
