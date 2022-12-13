@@ -44,8 +44,8 @@ cprint(f"Using device: {device}", logfile)
 #######
 # ## loading data #########
 
-#path = get_server_directory_path()
-path = "data/all/"
+path = get_server_directory_path()
+#path = "data/all/"
 
 metadata = read_metadata(path + "metadata.csv")
 metadata = metadata[:100]
@@ -165,8 +165,8 @@ for epoch in range(num_epochs):
             evalString = StatusString("evaluation", validation_data)
             cprint(train_string, logfile)
             cprint(evalString, logfile)
-            cprint("vi.beta: {}".format(vi.beta), logfile)
-            cprint("vi.alpha: {}".format(vi.alpha), logfile)        
+            #cprint("vi.beta: {}".format(vi.beta), logfile)
+            #cprint("vi.alpha: {}".format(vi.alpha), logfile)        
 
     vae.update_()
     vi.update_vi()
