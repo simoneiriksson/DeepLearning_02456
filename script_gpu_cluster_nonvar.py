@@ -50,20 +50,21 @@ path = get_server_directory_path()
 #path = "data/all/"
 
 #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
-metadata = read_metadata(path + "metadata.csv")
+metadata = read_metadata(path + "metadata.csv") #refactor? dtype=dataframe
 metadata = metadata[:100]
 cprint("loaded metadata",logfile)
 
 cprint("loading images", logfile)
-relative_paths = get_relative_image_paths(metadata)
-image_paths = [path + relative for relative in relative_paths]
+relative_paths = get_relative_image_paths(metadata) #refactor?
+image_paths = [path + relative for relative in relative_paths] #absolute path
 #images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
-images = torch.load("images.pt")
-create_directory('../data/')
+images = torch.load("images.pt") #TODO SIZE OF TENSOR??
+create_directory('../data/') #refactor?? 
 torch.save(images, '../data/images.pt')
-mapping = get_MOA_mappings(metadata)
+mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
 cprint("loaded images", logfile)
-normalize_channels_inplace(images)
+#normalize_channels_inplace(images)
+normalize_every_image_channels_seperately_inplace(images)
 cprint("normalized images", logfile)
 
 metadata = shuffle_metadata(metadata)
@@ -87,20 +88,22 @@ vae, validation_data, training_data, VAE_settings = initVAEmodel(latent_features
                                                                     image_shape = np.array([3, 68, 68]),
                                                                     model_type = "Cyto_nonvar"
                                                                     )
+#cprint("training_settings: {}".format(model_settings), logfile)
+#cprint("training_settings: {}".format(training_settings), logfile)
 cprint("VAE_settings: {}".format(VAE_settings), logfile)
 vae = vae.to(device)
 optimizer = torch.optim.Adam(vae.parameters(), lr=VAE_settings['learning_rate'], weight_decay=VAE_settings['weight_decay'])
 
-alpha = 0.05
-alpha_max = 0.05
-alpha_increase = (alpha_max-alpha) / VAE_settings['num_epochs']
-cprint("alpha_increase:{} ".format(alpha_increase), logfile)
-beta_max = 1
-beta_increase = (beta_max - VAE_settings['beta']) / VAE_settings['num_epochs']
-cprint("beta_increase:{} ".format(beta_increase), logfile)
+alpha = 0.05 #this is a model setting
+alpha_max = 0.05 #this is a model setting
+alpha_increase = (alpha_max-alpha) / VAE_settings['num_epochs'] #this is a model setting
+cprint("alpha_increase:{} ".format(alpha_increase), logfile) #this is a model setting
+beta_max = 1 #this is a model setting
+beta_increase = (beta_max - VAE_settings['beta']) / VAE_settings['num_epochs'] #this is a model setting
+cprint("beta_increase:{} ".format(beta_increase), logfile) #this is a model setting
 
 #vi = VariationalInferenceSparseVAE(beta=VAE_settings['beta'], beta_increase=beta_increase, alpha=alpha, alpha_increase=alpha_increase, alpha_max=alpha_max)
-vi = VariationalInference_nonvar(beta=VAE_settings['beta'])
+vi = VariationalInference_nonvar(beta=VAE_settings['beta']) #to correct belonging under vae?)
 
 train_loader = DataLoader(train_set, batch_size=VAE_settings['batch_size'], shuffle=True, num_workers=0, drop_last=True)
 validation_loader = DataLoader(validation_set, batch_size=min(1024*32, max(len(validation_set), VAE_settings['batch_size'])), shuffle=False, num_workers=0, drop_last=False)
@@ -114,8 +117,8 @@ num_epochs = VAE_settings['num_epochs']
 batch_size = VAE_settings['batch_size']
 
 print_every = 1
-impatience_level = 0
-max_patience = 100
+#impatience_level = 0
+#max_patience = 100
 
 best_elbo = np.finfo(np.float64).min
 
@@ -154,12 +157,12 @@ for epoch in range(num_epochs):
         for k, v in diagnostics.items():
             validation_data[k] += [np.mean(validation_epoch_data[k])]
         
-        impatience_level += 1
+        #impatience_level += 1
         
-        current_elbo = validation_data["elbo"][-1]
-        if current_elbo > best_elbo:
-            impatience_level = 0
-            best_elbo = current_elbo
+        #current_elbo = validation_data["elbo"][-1]
+        #if current_elbo > best_elbo:
+            #impatience_level = 0
+            #best_elbo = current_elbo
         
         #if impatience_level > max_patience:
         #    cprint("no more patience left at epoch {}".format(epoch), logfile)
