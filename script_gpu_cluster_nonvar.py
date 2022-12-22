@@ -79,18 +79,27 @@ validation_set = SingleCellDataset(metadata_validation, images, mapping)
 cprint("VAE Configs", logfile)
 
 # start another training session
-vae, validation_data, training_data, VAE_settings = initVAEmodel(latent_features= 256,
-                                                                    num_epochs = 10,
-                                                                    batch_size = min(64, len(train_set)),
-                                                                    learning_rate = 1e-3,
-                                                                    weight_decay = 1e-3,
-                                                                    image_shape = np.array([3, 68, 68]),
-                                                                    model_type = "Cyto_nonvar",
-                                                                    alpha = 0.05,
-                                                                    alpha_max = 0.05,
-                                                                    beta = 0.5,
-                                                                    beta_max = 1
-                                                                    )
+
+parameters = {
+    'num_epochs' : 10,
+    'batch_size' : min(64, len(train_set)),
+    'learning_rate' : 1e-3,
+    'weight_decay' : 1e-3,
+    'image_shape' : np.array([3, 68, 68]),
+    'latent_features' : 256, # ... and so on
+    'model_type' : "Cyto_nonvar",
+    'alpha': 0.05, 
+    'alpha_max': 0.05,
+    'beta': 0.5, 
+    'beta_max': 1
+    }
+
+parameters['alpha_increase'] = (parameters['alpha_max'] - parameters['alpha'])/parameters['num_epochs']
+parameters['beta_increase'] = (parameters['beta_max'] - parameters['beta'])/parameters['num_epochs']
+#alpha_increase = (model_params['alpha_max'] - model_params['alpha'])/training_params['num_epochs']
+#beta_increase = (model_params['beta_max'] - model_params['beta'])/training_params['num_epochs']
+
+vae, validation_data, training_data, VAE_settings = initVAEmodel(parameters)
 #cprint("training_settings: {}".format(model_settings), logfile)
 #cprint("training_settings: {}".format(training_settings), logfile)
 cprint("VAE_settings: {}".format(VAE_settings), logfile)
