@@ -7,10 +7,12 @@ from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_
 from models.VariationalAutoencoder import VariationalAutoencoder
 from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
 from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
-from models.VariationalInference_nonvar import *
+from models.VariationalInference_nonvar import VariationalInference_nonvar
+from models.VariationalInference import VariationalInference
+
 
 def LoadVAEmodel(folder, model_type=None, device="cpu", ):
-    params = torch.load(folder + "parameters.pt", map_location=torch.device(device))
+    params = torch.load(folder + "params.pt", map_location=torch.device(device))
 
     validation_data = torch.load(folder + "validation_data.pt", map_location=torch.device(device))
     training_data = torch.load(folder + "training_data.pt", map_location=torch.device(device))
@@ -23,10 +25,13 @@ def LoadVAEmodel(folder, model_type=None, device="cpu", ):
         vi = VariationalInference_nonvar(beta=params['beta'])
     if model_type == 'basic':
         vae = VariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference(beta=params['beta'])
     if model_type == 'Conv_simon':
         vae = ConvVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference_nonvar(beta=params['beta'])
     if model_type == 'SparseVAE':
         vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference_nonvar(beta=params['beta'])
     
     vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
     return vae, validation_data, training_data, params, vi
@@ -41,14 +46,18 @@ def initVAEmodel(params):
 
     if (model_type == None) or model_type == "Cyto":
         vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference(beta=params['beta'])
     if model_type == 'Cyto_nonvar':
         vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
         vi = VariationalInference_nonvar(beta=params['beta'])
     if model_type == 'basic':
         vae = VariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference(beta=params['beta'])
     if model_type == 'Conv_simon':
         vae = ConvVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference_nonvar(beta=params['beta'])
     if model_type == 'SparseVAE':
         vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        vi = VariationalInference_nonvar(beta=params['beta'])
     
     return vae, validation_performance, training_performance, params, vi

@@ -46,8 +46,8 @@ cprint(f"Using device: {device}", logfile)
 #######
 # ## loading data #########
 
-path = get_server_directory_path()
-#path = "data/all/"
+#path = get_server_directory_path()
+path = "../data/all/"
 
 #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
 metadata = read_metadata(path + "metadata.csv") #refactor? dtype=dataframe
@@ -57,10 +57,10 @@ cprint("loaded metadata",logfile)
 cprint("loading images", logfile)
 relative_paths = get_relative_image_paths(metadata) #refactor?
 image_paths = [path + relative for relative in relative_paths] #absolute path
-#images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
-images = torch.load("images.pt") #TODO SIZE OF TENSOR??
+images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
+#images = torch.load("images.pt") #TODO SIZE OF TENSOR??
 create_directory('../data/') #refactor?? 
-torch.save(images, '../data/images.pt')
+#torch.save(images, '../data/images.pt')
 mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
 cprint("loaded images", logfile)
 #normalize_channels_inplace(images)
@@ -96,26 +96,25 @@ params = {
 
 params['alpha_increase'] = (params['alpha_max'] - params['alpha'])/params['num_epochs']
 params['beta_increase'] = (params['beta_max'] - params['beta'])/params['num_epochs']
-
-vae, validation_data, training_data, VAE_settings = initVAEmodel(params)
+vae, validation_data, training_data, params, vi = initVAEmodel(params)
 #cprint("training_settings: {}".format(model_settings), logfile)
 #cprint("training_settings: {}".format(training_settings), logfile)
-cprint("VAE_settings: {}".format(VAE_settings), logfile)
+cprint("VAE_settings: {}".format(params), logfile)
 vae = vae.to(device)
-optimizer = torch.optim.Adam(vae.parameters(), lr=VAE_settings['learning_rate'], weight_decay=VAE_settings['weight_decay'])
+optimizer = torch.optim.Adam(vae.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
 
-cprint("alpha_increase:{} ".format(alpha_increase), logfile)
-cprint("beta_increase:{} ".format(beta_increase), logfile)
+cprint("alpha_increase:{} ".format(params['alpha_increase']), logfile)
+cprint("beta_increase:{} ".format(['beta_increase']), logfile)
 
-train_loader = DataLoader(train_set, batch_size=VAE_settings['batch_size'], shuffle=True, num_workers=0, drop_last=True)
-validation_loader = DataLoader(validation_set, batch_size=min(1024*32, max(len(validation_set), VAE_settings['batch_size'])), shuffle=False, num_workers=0, drop_last=False)
+train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=0, drop_last=True)
+validation_loader = DataLoader(validation_set, batch_size=min(1024*32, max(len(validation_set), params['batch_size'])), shuffle=False, num_workers=0, drop_last=False)
 #train_batcher = TreatmentBalancedBatchGenerator(images, metadata_train)
 
 ######### VAE Training #########
 cprint("VAE Training", logfile)
 
-num_epochs = VAE_settings['num_epochs']
-batch_size = VAE_settings['batch_size']
+num_epochs = params['num_epochs']
+batch_size = params['batch_size']
 
 print_every = 1
 
@@ -178,7 +177,7 @@ datetime = get_datetime()
 torch.save(vae.state_dict(), output_folder + "vae_parameters.pt")
 torch.save(validation_data, output_folder + "validation_data.pt")
 torch.save(training_data, output_folder + "training_data.pt")
-torch.save(VAE_settings, output_folder + "VAE_settings.pt")
+torch.save(params, output_folder + "params.pt")
 
 ######### extract a few images already #########
 cprint("Extract a few images already", logfile)
