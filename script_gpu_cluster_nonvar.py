@@ -80,7 +80,7 @@ cprint("VAE Configs", logfile)
 
 # start another training session
 
-parameters = {
+params = {
     'num_epochs' : 10,
     'batch_size' : min(64, len(train_set)),
     'learning_rate' : 1e-3,
@@ -94,12 +94,12 @@ parameters = {
     'beta_max': 1
     }
 
-parameters['alpha_increase'] = (parameters['alpha_max'] - parameters['alpha'])/parameters['num_epochs']
-parameters['beta_increase'] = (parameters['beta_max'] - parameters['beta'])/parameters['num_epochs']
+params['alpha_increase'] = (params['alpha_max'] - params['alpha'])/params['num_epochs']
+params['beta_increase'] = (params['beta_max'] - params['beta'])/params['num_epochs']
 #alpha_increase = (model_params['alpha_max'] - model_params['alpha'])/training_params['num_epochs']
 #beta_increase = (model_params['beta_max'] - model_params['beta'])/training_params['num_epochs']
 
-vae, validation_data, training_data, VAE_settings = initVAEmodel(parameters)
+vae, validation_data, training_data, VAE_settings = initVAEmodel(params)
 #cprint("training_settings: {}".format(model_settings), logfile)
 #cprint("training_settings: {}".format(training_settings), logfile)
 cprint("VAE_settings: {}".format(VAE_settings), logfile)
