@@ -86,7 +86,7 @@ params = {
     'learning_rate' : 1e-3,
     'weight_decay' : 1e-3,
     'image_shape' : np.array([3, 68, 68]),
-    'latent_features' : 256, # ... and so on
+    'latent_features' : 256,
     'model_type' : "Cyto_nonvar",
     'alpha': 0.05, 
     'alpha_max': 0.05,
@@ -96,8 +96,6 @@ params = {
 
 params['alpha_increase'] = (params['alpha_max'] - params['alpha'])/params['num_epochs']
 params['beta_increase'] = (params['beta_max'] - params['beta'])/params['num_epochs']
-#alpha_increase = (model_params['alpha_max'] - model_params['alpha'])/training_params['num_epochs']
-#beta_increase = (model_params['beta_max'] - model_params['beta'])/training_params['num_epochs']
 
 vae, validation_data, training_data, VAE_settings = initVAEmodel(params)
 #cprint("training_settings: {}".format(model_settings), logfile)
@@ -113,7 +111,6 @@ train_loader = DataLoader(train_set, batch_size=VAE_settings['batch_size'], shuf
 validation_loader = DataLoader(validation_set, batch_size=min(1024*32, max(len(validation_set), VAE_settings['batch_size'])), shuffle=False, num_workers=0, drop_last=False)
 #train_batcher = TreatmentBalancedBatchGenerator(images, metadata_train)
 
-
 ######### VAE Training #########
 cprint("VAE Training", logfile)
 
@@ -121,8 +118,6 @@ num_epochs = VAE_settings['num_epochs']
 batch_size = VAE_settings['batch_size']
 
 print_every = 1
-#impatience_level = 0
-#max_patience = 100
 
 best_elbo = np.finfo(np.float64).min
 
@@ -160,17 +155,7 @@ for epoch in range(num_epochs):
         
         for k, v in diagnostics.items():
             validation_data[k] += [np.mean(validation_epoch_data[k])]
-        
-        #impatience_level += 1
-        
-        #current_elbo = validation_data["elbo"][-1]
-        #if current_elbo > best_elbo:
-            #impatience_level = 0
-            #best_elbo = current_elbo
-        
-        #if impatience_level > max_patience:
-        #    cprint("no more patience left at epoch {}".format(epoch), logfile)
-        #    break
+            
         if epoch % print_every == 0:
             cprint(f"epoch: {epoch}/{num_epochs}", logfile)
             train_string = StatusString("training", training_epoch_data)
