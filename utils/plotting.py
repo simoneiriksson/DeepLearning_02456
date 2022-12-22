@@ -1,10 +1,16 @@
 from typing import List, Set, Dict, Tuple, Optional, Any
 import torch
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 import torch.nn as nn
 
 from utils.data_transformers import view_as_image_plot_format, clip_image_to_zero_one
+from utils.profiling import treatment_profiles
+
+from sklearn.neighbors import NearestNeighbors
+from sklearn.metrics import confusion_matrix
 
 def img_saturate(img):
     return img / img.max()
@@ -127,3 +133,35 @@ def plot_cosine_similarity(x0, x1, model, file=None, title=None):
         plt.savefig(file)
     
     plt.close()
+    
+    
+def heatmap(metadata_latent):
+    metadata_onehot = pd.concat([metadata_latent, pd.get_dummies(metadata_latent["moa"], prefix = 'onehot_moa')], axis=1)
+    latent_cols = [col for col in metadata_onehot.columns if type(col)==str and col[0:7]=='latent_']
+    one_hot_cols = [col for col in metadata_onehot.columns if type(col)==str and col[0:7]=='onehot_']
+    heatmap_matrix = metadata_onehot[one_hot_cols + latent_cols].corr().filter(items=one_hot_cols, axis=0)[latent_cols]
+    return plt.matshow(heatmap_matrix.abs())
+
+
+def moa_confusion(metadata_latent, mapping, p=2):
+    treatment_profiles_df = treatment_profiles(metadata_latent)
+    latent_cols = [col for col in metadata_latent.columns if type(col)==str and col[0:7]=='latent_']
+    
+    for compound in metadata_latent['Image_Metadata_Compound'].unique():
+        A_set = treatment_profiles_df[treatment_profiles_df['Image_Metadata_Compound'] == compound]
+        B_set = treatment_profiles_df[treatment_profiles_df['Image_Metadata_Compound'] != compound]
+        for A in A_set.index:
+            A_treatment = A_set.loc[A]['Treatment']
+            diffs = (abs(B_set[latent_cols] - A_set.loc[A][latent_cols]))**p
+            diffs_sum = diffs.sum(axis=1)**(1/p)
+            diffs_min = diffs_sum.min()
+            treatment_profiles_df.loc[treatment_profiles_df['Treatment']==A_treatment,'moa_pred'] = B_set.at[diffs[diffs_sum == diffs_min].index[0], 'moa']
+
+    cf_matrix=confusion_matrix(treatment_profiles_df['moa'], treatment_profiles_df['moa_pred'])  
+    df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *100, index = [i for i in mapping],
+                         columns = [i for i in mapping])
+    plt.figure(figsize = (12,7))
+    sns.heatmap(df_cm, annot=True)
+
+
+

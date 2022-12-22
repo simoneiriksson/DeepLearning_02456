@@ -3,6 +3,10 @@ import numpy as np
 
 # extracting latent variables for each image/cell
 def LatentVariableExtraction(metadata, images, batch_size, vae):
+    metadata['Well_unique'] = metadata['Image_Metadata_Well_DAPI'] + '_' + metadata['Image_Metadata_Plate_DAPI']
+    metadata['Treatment'] = metadata['Image_Metadata_Compound'] + '_' + metadata['Image_Metadata_Concentration'].astype(str)
+    metadata['week'] = metadata['Image_PathName_DAPI'].str.split("_", n=1, expand = True)[0]
+    metadata['row_id'] = np.arange(len(metadata))
     images.shape[0]
     batch_size=min(batch_size, len(images))
     batch_offset = np.arange(start=0, stop=images.shape[0]+1, step=batch_size)
