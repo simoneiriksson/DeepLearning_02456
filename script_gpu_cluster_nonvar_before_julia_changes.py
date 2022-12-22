@@ -80,16 +80,13 @@ cprint("VAE Configs", logfile)
 
 # start another training session
 vae, validation_data, training_data, VAE_settings = initVAEmodel(latent_features= 256,
+                                                                    beta = 0.5,
                                                                     num_epochs = 10,
                                                                     batch_size = min(64, len(train_set)),
                                                                     learning_rate = 1e-3,
                                                                     weight_decay = 1e-3,
                                                                     image_shape = np.array([3, 68, 68]),
-                                                                    model_type = "Cyto_nonvar",
-                                                                    alpha = 0.05,
-                                                                    alpha_max = 0.05,
-                                                                    beta = 0.5,
-                                                                    beta_max = 1
+                                                                    model_type = "Cyto_nonvar"
                                                                     )
 #cprint("training_settings: {}".format(model_settings), logfile)
 #cprint("training_settings: {}".format(training_settings), logfile)
@@ -97,8 +94,16 @@ cprint("VAE_settings: {}".format(VAE_settings), logfile)
 vae = vae.to(device)
 optimizer = torch.optim.Adam(vae.parameters(), lr=VAE_settings['learning_rate'], weight_decay=VAE_settings['weight_decay'])
 
-cprint("alpha_increase:{} ".format(alpha_increase), logfile)
-cprint("beta_increase:{} ".format(beta_increase), logfile)
+alpha = 0.05 #this is a model setting
+alpha_max = 0.05 #this is a model setting
+alpha_increase = (alpha_max-alpha) / VAE_settings['num_epochs'] #this is a model setting
+cprint("alpha_increase:{} ".format(alpha_increase), logfile) #this is a model setting
+beta_max = 1 #this is a model setting
+beta_increase = (beta_max - VAE_settings['beta']) / VAE_settings['num_epochs'] #this is a model setting
+cprint("beta_increase:{} ".format(beta_increase), logfile) #this is a model setting
+
+#vi = VariationalInferenceSparseVAE(beta=VAE_settings['beta'], beta_increase=beta_increase, alpha=alpha, alpha_increase=alpha_increase, alpha_max=alpha_max)
+vi = VariationalInference_nonvar(beta=VAE_settings['beta']) #to correct belonging under vae?)
 
 train_loader = DataLoader(train_set, batch_size=VAE_settings['batch_size'], shuffle=True, num_workers=0, drop_last=True)
 validation_loader = DataLoader(validation_set, batch_size=min(1024*32, max(len(validation_set), VAE_settings['batch_size'])), shuffle=False, num_workers=0, drop_last=False)
