@@ -2,7 +2,7 @@ import numpy as np
 from torch import nn, Tensor
 import torch
 from torch.distributions import Distribution, Exponential, Cauchy, HalfCauchy, Normal
-from models.PrintSize import *
+from models.PrintSize import PrintSize
 from typing import List, Set, Dict, Tuple, Optional, Any
 
 

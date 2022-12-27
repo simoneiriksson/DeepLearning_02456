@@ -1,6 +1,7 @@
-from models.CytoVariationalAutoencoder import *
 from typing import List, Set, Dict, Tuple, Optional, Any
 from collections import defaultdict
+import torch
+import numpy as np
 
 from models.CytoVariationalAutoencoder import CytoVariationalAutoencoder
 from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar

@@ -2,7 +2,7 @@ from typing import List, Set, Dict, Tuple, Optional, Any
 import pandas as pd
 import numpy as np
 import os
-from utils.utils import *
+from utils.utils import cprint
 import torch
 
 def read_metadata(path: str) -> pd.DataFrame:

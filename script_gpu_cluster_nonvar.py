@@ -1,11 +1,9 @@
 from typing import List, Set, Dict, Tuple, Optional, Any
 from collections import defaultdict
-
 import pandas as pd
 import seaborn as sns
 import numpy as np
 import matplotlib.pyplot as plt
-
 
 import math 
 import torch
@@ -15,20 +13,20 @@ from torch.distributions import Distribution, Normal
 from torch.utils.data import DataLoader
 from torch.utils.data import DataLoader, Dataset
 
-from utils.data_preparation import *
-from utils.data_transformers import *
-from utils.plotting import *
-from utils.training import *
-
-from models.ReparameterizedDiagonalGaussian import *
-from models.CytoVariationalAutoencoder_nonvar import *
-from models.VariationalAutoencoder import *
+from models.LoadModels import LoadVAEmodel, initVAEmodel, initVAEmodel_old, LoadVAEmodel_old
+from models.ReparameterizedDiagonalGaussian import ReparameterizedDiagonalGaussian
+from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar
+from models.VariationalAutoencoder import VariationalAutoencoder
 from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
-from models.ConvVariationalAutoencoder import *
-from models.VariationalInference_nonvar import *
+from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
+from models.VariationalInference_nonvar import VariationalInference_nonvar
 from models.VariationalInferenceSparseVAE import VariationalInferenceSparseVAE
-from utils.utils import *
-from models.LoadModels import *
+from utils.data_transformers import normalize_every_image_channels_seperately_inplace
+from utils.data_transformers import SingleCellDataset
+from utils.plotting import plot_VAE_performance, plot_image_channels
+from utils.training import create_directory, read_metadata, get_relative_image_paths, load_images
+from utils.training import get_MOA_mappings, shuffle_metadata, split_metadata
+from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
 
 ######### Utilities #########
 
@@ -121,26 +119,25 @@ print_every = 1
 best_elbo = np.finfo(np.float64).min
 
 for epoch in range(num_epochs):
-    
     training_epoch_data = defaultdict(list)
-    vae.train()
-    
+    _ = vae.train()
     for x, _ in train_loader:
         x = x.to(device)
         # perform a forward pass through the model and compute the ELBO
         loss, diagnostics, outputs = vi(vae, x)
         optimizer.zero_grad()
         loss.backward()
-        nn.utils.clip_grad_norm_(vae.parameters(), 10_000)
+        
+        meh = nn.utils.clip_grad_norm_(vae.parameters(), 10_000)
         optimizer.step()
         for k, v in diagnostics.items():
             training_epoch_data[k] += [v.mean().item()]
-    
+
     for k, v in training_epoch_data.items():
         training_data[k] += [np.mean(training_epoch_data[k])]
-    
+
     with torch.no_grad():
-        vae.eval()
+        _ = vae.eval()
         
         validation_epoch_data = defaultdict(list)
         
