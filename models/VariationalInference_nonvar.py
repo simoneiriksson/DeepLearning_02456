@@ -28,7 +28,7 @@ class VariationalInference_nonvar(nn.Module):
         #mse_loss_all = (math.pi * 2 * (x_hat - x) ** 2).sqrt().log() + 0.5
         #mse_loss = mse_loss_all.sum(axis=[1,2,3])
         
-        image_loss = ((x_hat - x).abs()**self.p_norm).sum(axis=[1,2,3])**(1/(self.p_norm))
+        image_loss = ((x_hat - x).abs()**self.p_norm).sum(axis=[1,2,3])
         #print("qz_sigma.shape: ", qz_sigma.shape)
         #print("mse_loss.shape", mse_loss.shape)        
         kl = - (.5 * (1 + (qz_sigma ** 2).log() - qz_mu ** 2 - qz_sigma**2)).sum(axis=[1])

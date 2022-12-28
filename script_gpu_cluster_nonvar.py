@@ -45,19 +45,19 @@ cprint(f"Using device: {device}", logfile)
 #######
 # ## loading data #########
 
-#path = get_server_directory_path()
-path = "../data/all/"
+path = get_server_directory_path()
+#path = "../data/all/"
 
 #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
 metadata = read_metadata(path + "metadata.csv") #refactor? dtype=dataframe
-metadata = metadata[:100]
+#metadata = metadata[:100]
 cprint("loaded metadata",logfile)
 
 cprint("loading images", logfile)
 relative_paths = get_relative_image_paths(metadata) #refactor?
 image_paths = [path + relative for relative in relative_paths] #absolute path
-images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
-#images = torch.load("../data/images.pt") #TODO SIZE OF TENSOR??
+#images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
+images = torch.load("../data/images.pt") #TODO SIZE OF TENSOR??
 #create_directory('../data/') #refactor?? 
 #torch.save(images, '../data/images.pt')
 mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
@@ -82,7 +82,7 @@ cprint("VAE Configs", logfile)
 # start another training session
 
 params = {
-    'num_epochs' : 100,
+    'num_epochs' : 10,
     'batch_size' : min(64, len(train_set)),
     'learning_rate' : 1e-3,
     'weight_decay' : 1e-3,
@@ -98,6 +98,7 @@ params = {
 
 params['alpha_increase'] = (params['alpha_max'] - params['alpha'])/params['num_epochs']
 params['beta_increase'] = (params['beta_max'] - params['beta'])/params['num_epochs']
+
 vae, validation_data, training_data, params, vi = initVAEmodel(params)
 #cprint("training_settings: {}".format(model_settings), logfile)
 #cprint("training_settings: {}".format(training_settings), logfile)
