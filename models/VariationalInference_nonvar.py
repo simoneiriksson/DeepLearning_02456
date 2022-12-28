@@ -11,9 +11,10 @@ def reduce(x:Tensor) -> Tensor:
     return flat.sum(dim=1)
 
 class VariationalInference_nonvar(nn.Module):
-    def __init__(self, beta:float=1.):
+    def __init__(self, beta:float=1., p_norm = 2.):
         super().__init__()
         self.beta = beta
+        self.p_norm = float(p_norm)
 
     def update_vi(self):
         pass
@@ -27,21 +28,21 @@ class VariationalInference_nonvar(nn.Module):
         #mse_loss_all = (math.pi * 2 * (x_hat - x) ** 2).sqrt().log() + 0.5
         #mse_loss = mse_loss_all.sum(axis=[1,2,3])
         
-        mse_loss = ((x_hat - x)**2).sum(axis=[1,2,3])
+        image_loss = ((x_hat - x).abs()**self.p_norm).sum(axis=[1,2,3])**(1/(self.p_norm))
         #print("qz_sigma.shape: ", qz_sigma.shape)
         #print("mse_loss.shape", mse_loss.shape)        
         kl = - (.5 * (1 + (qz_sigma ** 2).log() - qz_mu ** 2 - qz_sigma**2)).sum(axis=[1])
 
         #elbo = log_px - kl
         #beta_elbo = log_px - self.beta * kl
-        beta_elbo = -mse_loss - self.beta * kl
+        beta_elbo = -image_loss - self.beta * kl
         #beta_elbo = -mse_loss
         # loss
         loss = -beta_elbo.mean()
         
         # prepare the output
         with torch.no_grad():
-            diagnostics = {'elbo': beta_elbo, 'mse_loss':mse_loss, 'kl': kl}
+            diagnostics = {'elbo': beta_elbo, 'mse_loss':image_loss, 'kl': kl}
             
         return loss, diagnostics, outputs
       
