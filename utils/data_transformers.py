@@ -29,17 +29,19 @@ def normalize_channels_inplace(data: torch.Tensor):
     for i in range(view.shape[0]):
         view[i] /= torch.max(view[i])
 
-def normalize_every_image_channels_seperately_inplace(images: torch.Tensor):
+def normalize_every_image_channels_seperately_inplace(images: torch.Tensor, verbose=False):
     """ 
         As the original paper: X_ij / max(X_ij)
         input shape: [sample, channel, height, width] 
     """
     flat_images = images.reshape(images.size(0), 3, -1)
-    
     max_values, _ =  torch.max(flat_images, dim=-1)
     view_max_expanded = max_values[:,:,None].expand(images.size(0), 3, 4624)
     
     flat_images /= view_max_expanded
+    if verbose:
+        print("flat_images.shape: {flat_images.shape}")
+        print("max_values: {max_values}")
     
 def normalize_channels_by_max_inplace(data: torch.Tensor):
     """ 

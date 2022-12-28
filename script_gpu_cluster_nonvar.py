@@ -27,7 +27,7 @@ from utils.plotting import plot_VAE_performance, plot_image_channels
 from utils.training import create_directory, read_metadata, get_relative_image_paths, load_images
 from utils.training import get_MOA_mappings, shuffle_metadata, split_metadata
 from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
-
+import importlib
 ######### Utilities #########
 
 constant_seed()
@@ -62,7 +62,7 @@ create_directory('../data/') #refactor??
 mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
 cprint("loaded images", logfile)
 #normalize_channels_inplace(images)
-normalize_every_image_channels_seperately_inplace(images)
+normalize_every_image_channels_seperately_inplace(images, verbose=True)
 cprint("normalized images", logfile)
 
 metadata = shuffle_metadata(metadata)
@@ -105,7 +105,7 @@ cprint("alpha_increase:{} ".format(params['alpha_increase']), logfile)
 cprint("beta_increase:{} ".format(['beta_increase']), logfile)
 
 train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=0, drop_last=True)
-validation_loader = DataLoader(validation_set, batch_size=min(1024*32, max(len(validation_set), params['batch_size'])), shuffle=False, num_workers=0, drop_last=False)
+validation_loader = DataLoader(validation_set, batch_size=max(2, params['batch_size']), shuffle=False, num_workers=0, drop_last=False)
 #train_batcher = TreatmentBalancedBatchGenerator(images, metadata_train)
 
 ######### VAE Training #########
@@ -131,7 +131,7 @@ for epoch in range(num_epochs):
         meh = nn.utils.clip_grad_norm_(vae.parameters(), 10_000)
         optimizer.step()
         for k, v in diagnostics.items():
-            training_epoch_data[k] += [v.mean().item()]
+            training_epoch_data[k] += v.detach()
 
     for k, v in training_epoch_data.items():
         training_data[k] += [np.mean(training_epoch_data[k])]
@@ -147,7 +147,7 @@ for epoch in range(num_epochs):
             loss, diagnostics, outputs = vi(vae, x)
             
             for k, v in diagnostics.items():
-                validation_epoch_data[k] += [v.mean().item()]
+                validation_epoch_data[k] += v.detach()
         
         for k, v in diagnostics.items():
             validation_data[k] += [np.mean(validation_epoch_data[k])]
@@ -155,7 +155,7 @@ for epoch in range(num_epochs):
         if epoch % print_every == 0:
             cprint(f"epoch: {epoch}/{num_epochs}", logfile)
             train_string = StatusString("training", training_epoch_data)
-            evalString = StatusString("evaluation", validation_data)
+            evalString = StatusString("evaluation", validation_epoch_data)
             cprint(train_string, logfile)
             cprint(evalString, logfile)
             #cprint("vi.beta: {}".format(vi.beta), logfile)
