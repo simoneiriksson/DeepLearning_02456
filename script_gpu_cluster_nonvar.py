@@ -57,7 +57,7 @@ cprint("loading images", logfile)
 relative_paths = get_relative_image_paths(metadata) #refactor?
 image_paths = [path + relative for relative in relative_paths] #absolute path
 images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
-#images = torch.load("images.pt") #TODO SIZE OF TENSOR??
+#images = torch.load("../data/images.pt") #TODO SIZE OF TENSOR??
 create_directory('../data/') #refactor?? 
 #torch.save(images, '../data/images.pt')
 mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
