@@ -1,6 +1,9 @@
 .spyproject
 models/__init__.py
 utils/__init__.py
-__pycache__
+__init__.py
+__pycache__/
 dump/
 .vscode/launch.json
+.vscode/
+.ipynb_checkpoints/
