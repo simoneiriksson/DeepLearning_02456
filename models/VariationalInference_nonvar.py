@@ -22,27 +22,24 @@ class VariationalInference_nonvar(nn.Module):
     def forward(self, model:nn.Module, x:Tensor) -> Tuple[Tensor, Dict]:
         outputs = model(x)
 
+        # Unpack values from VAE
         x_hat, qz_log_sigma, qz_mu, z = [outputs[k] for k in ["x_hat", "qz_log_sigma", "qz_mu", "z"]]
         qz_sigma = qz_log_sigma.exp()
-        
-        #mse_loss_all = (math.pi * 2 * (x_hat - x) ** 2).sqrt().log() + 0.5
-        #mse_loss = mse_loss_all.sum(axis=[1,2,3])
-        
+        # Imagewise loss. Calculated as the p-norm distance in pixel-space between original and reconstructed image
         image_loss = ((x_hat - x).abs()**self.p_norm).sum(axis=[1,2,3])
-        #print("qz_sigma.shape: ", qz_sigma.shape)
-        #print("mse_loss.shape", mse_loss.shape)        
+
+        # KL-divergence calculated explicitly
         kl = - (.5 * (1 + (qz_sigma ** 2).log() - qz_mu ** 2 - qz_sigma**2)).sum(axis=[1])
 
-        #elbo = log_px - kl
-        #beta_elbo = log_px - self.beta * kl
+        # Image-wise beta-elbo:
         beta_elbo = -image_loss - self.beta * kl
-        #beta_elbo = -mse_loss
-        # loss
+
+        # Loss is the mean of the imagewise losses, over the full batch of images
         loss = -beta_elbo.mean()
         
         # prepare the output
         with torch.no_grad():
-            diagnostics = {'elbo': beta_elbo, 'mse_loss':image_loss, 'kl': kl}
+            diagnostics = {'elbo': beta_elbo, 'image_loss':image_loss, 'kl': kl}
             
         return loss, diagnostics, outputs
       

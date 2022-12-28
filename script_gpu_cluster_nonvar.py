@@ -102,12 +102,12 @@ params['beta_increase'] = (params['beta_max'] - params['beta'])/params['num_epoc
 vae, validation_data, training_data, params, vi = initVAEmodel(params)
 #cprint("training_settings: {}".format(model_settings), logfile)
 #cprint("training_settings: {}".format(training_settings), logfile)
-cprint("VAE_settings: {}".format(params), logfile)
+cprint("params: {}".format(params), logfile)
 vae = vae.to(device)
 optimizer = torch.optim.Adam(vae.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
 
 cprint("alpha_increase:{} ".format(params['alpha_increase']), logfile)
-cprint("beta_increase:{} ".format(['beta_increase']), logfile)
+cprint("beta_increase:{} ".format(params['beta_increase']), logfile)
 
 train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=0, drop_last=True)
 validation_loader = DataLoader(validation_set, batch_size=max(2, params['batch_size']), shuffle=False, num_workers=0, drop_last=False)
