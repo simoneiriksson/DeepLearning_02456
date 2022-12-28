@@ -30,7 +30,7 @@ class VariationalInferenceSparseVAE(nn.Module):
         #KL_part2 = -(1 - qz_gamma).mul(((1 - self.alpha).div(1 - qz_gamma)).log())
         #KL_part3 = -qz_gamma.mul((self.alpha.div(qz_gamma)).log())
         
-        # implementation from github
+        # implementation adapted from article
         qz_gamma = torch.clamp(qz_log_gamma.exp(), 1e-6, 1.0 - 1e-6) 
         KL_part1 = 0.5 * qz_gamma.mul(1 + qz_log_sigma * 2 - qz_mu ** 2 - qz_log_sigma.exp() ** 2)
         KL_part2 = (1 - qz_gamma).mul(((1 - self.alpha)/(1 - qz_gamma)).log())

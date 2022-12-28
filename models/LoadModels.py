@@ -23,7 +23,7 @@ def LoadVAEmodel(folder, model_type=None, device="cpu"):
         vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
     if model_type == 'Cyto_nonvar':
         vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
-        if 'p_norm' in params.items(): p_norm = params['p_norm'] 
+        if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
         else: p_norm = 2
         vi = VariationalInference_nonvar(beta=params['beta'], p_norm = p_norm)
     if model_type == 'basic':
