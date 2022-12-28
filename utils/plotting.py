@@ -140,24 +140,7 @@ def heatmap(metadata_latent):
     heatmap_matrix = metadata_onehot[one_hot_cols + latent_cols].corr().filter(items=one_hot_cols, axis=0)[latent_cols]
     return plt.matshow(heatmap_matrix.abs())
    
-   
-def moa_confusion(targets, predictions, mapping):
-    nb_classes = len(targets.unique())
-    moa_classes = targets.sort_values().unique()
-    classes = np.zeros((nb_classes, nb_classes))
-    for i in range(nb_classes):
-        for j in range(nb_classes):
-            for t in range(len(targets)):
-                if targets[t] == moa_classes[i] and predictions[t] == moa_classes[j]:
-                    classes[i,j] += 1
-    
-    cf_matrix = classes  
-    df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *100, index = [i for i in mapping],
-                         columns = [i for i in mapping])
-    plt.figure(figsize = (12,7))
-    sns.heatmap(df_cm, annot=True)
-   
-    
+
 def NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2):
     treatment_profiles_df = treatment_profiles(metadata_latent)
     latent_cols = [col for col in metadata_latent.columns if type(col)==str and col[0:7]=='latent_']
@@ -171,8 +154,37 @@ def NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2):
             diffs_sum = diffs.sum(axis=1)**(1/p)
             diffs_min = diffs_sum.min()
             treatment_profiles_df.loc[treatment_profiles_df['Treatment']==A_treatment,'moa_pred'] = B_set.at[diffs[diffs_sum == diffs_min].index[0], 'moa']
-            
     return treatment_profiles_df['moa'], treatment_profiles_df['moa_pred']
+
+    
+def moa_confusion_matrix(targets, predictions, mapping):
+    nb_classes = len(targets.unique())
+    moa_classes = targets.sort_values().unique()
+    classes = np.zeros((nb_classes, nb_classes))
+    for i in range(nb_classes):
+        for j in range(nb_classes):
+            for t in range(len(targets)):
+                if targets[t] == moa_classes[i] and predictions[t] == moa_classes[j]:
+                    classes[i,j] += 1
+    
+    cf_matrix = classes  
+    df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *100, index = [i for i in mapping],
+                         columns = [i for i in mapping])
+    return cf_matrix, df_cm
+
+
+def plot_confusion_matrix(confusion_matrix):
+    plt.figure(figsize = (12,7))
+    sns.heatmap(confusion_matrix, annot=True)
+    
+    
+def Accuracy(confusion_matrix):
+    class_accuracy = 100*confusion_matrix.diagonal()/confusion_matrix.sum(1)
+    class_accuracy = class_accuracy.mean()
+    return class_accuracy
+   
+    
+
 
 
 
