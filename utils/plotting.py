@@ -9,10 +9,6 @@ import torch.nn as nn
 from utils.data_transformers import view_as_image_plot_format, clip_image_to_zero_one
 from utils.profiling import treatment_profiles
 
-#from sklearn.neighbors import NearestNeighbors
-#from sklearn.metrics import confusion_matrix
-#https://pytorch.org/ignite/generated/ignite.metrics.confusion_matrix.ConfusionMatrix.html
-
 
 def img_saturate(img):
     return img / img.max()
@@ -145,13 +141,21 @@ def heatmap(metadata_latent):
     return plt.matshow(heatmap_matrix.abs())
    
    
-'''def moa_confusion(metadata_latent, mapping, p=2):
+def moa_confusion(targets, predictions, mapping):
+    nb_classes = len(targets.unique())
+    moa_classes = targets.sort_values().unique()
+    classes = np.zeros((nb_classes, nb_classes))
+    for i in range(nb_classes):
+        for j in range(nb_classes):
+            for t in range(len(targets)):
+                if targets[t] == moa_classes[i] and predictions[t] == moa_classes[j]:
+                    classes[i,j] += 1
     
-    cf_matrix=confusion_matrix(treatment_profiles_df['moa'], treatment_profiles_df['moa_pred'])  
+    cf_matrix = classes  
     df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *100, index = [i for i in mapping],
                          columns = [i for i in mapping])
     plt.figure(figsize = (12,7))
-    sns.heatmap(df_cm, annot=True)'''
+    sns.heatmap(df_cm, annot=True)
    
     
 def NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2):
