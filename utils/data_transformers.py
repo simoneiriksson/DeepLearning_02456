@@ -20,14 +20,19 @@ def view_channel_dim_first(data: torch.Tensor) -> torch.Tensor:
     """
     return torch.permute(data, dims=(1,0,2,3))
 
-def normalize_channels_inplace(data: torch.Tensor):
+def normalize_channels_inplace(data: torch.Tensor, verbose=False):
     """ 
         Normalize by max channel across all images: X_i / max(X_i)
         input shape: [sample, channel, height, width]
     """
     view = view_channel_dim_first(data)
+    if verbose:
+        print(f"view.shape: {view.shape}")
+
     for i in range(view.shape[0]):
         view[i] /= torch.max(view[i])
+        if verbose:
+            print(f"torch.max(view[i]).shape: {torch.max(view[i])}")
 
 def normalize_every_image_channels_seperately_inplace(images: torch.Tensor, verbose=False):
     """ 
@@ -40,8 +45,9 @@ def normalize_every_image_channels_seperately_inplace(images: torch.Tensor, verb
     
     flat_images /= view_max_expanded
     if verbose:
-        print("flat_images.shape: {flat_images.shape}")
-        print("max_values: {max_values}")
+        print(f"flat_images.shape: {flat_images.shape}")
+#        print(f"max_values: {max_values}")
+        print(f"max_values.shape: {max_values.shape}")
     
 def normalize_channels_by_max_inplace(data: torch.Tensor):
     """ 
@@ -50,6 +56,17 @@ def normalize_channels_by_max_inplace(data: torch.Tensor):
     """
     data /= 40_000
     
+def batch_normalize_images(image_batch, verbose = False):
+    maxes = torch.amax(image_batch, dim=(0,2,3))
+    for i in [0,1,2]:
+        image_batch[:,i,:,:] = image_batch[:,i,:,:].div(maxes[i])  
+    if verbose == True: 
+        print(f"image_batch.shape: {image_batch.shape}")
+        print(f"maxes.shape: {maxes.shape}")
+        print(f"maxes: {maxes}")
+        print(f"torch.amax(image_batch, dim=(0,2,3)): {torch.amax(image_batch, dim=(0,2,3))}")
+    return image_batch
+
 def img_saturate(img: torch.Tensor) -> torch.Tensor:
     return img / torch.max(img)
 

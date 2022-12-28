@@ -21,7 +21,7 @@ from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
 from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
 from models.VariationalInference_nonvar import VariationalInference_nonvar
 from models.VariationalInferenceSparseVAE import VariationalInferenceSparseVAE
-from utils.data_transformers import normalize_every_image_channels_seperately_inplace
+from utils.data_transformers import normalize_every_image_channels_seperately_inplace, normalize_channels_inplace, batch_normalize_images
 from utils.data_transformers import SingleCellDataset
 from utils.plotting import plot_VAE_performance, plot_image_channels
 from utils.training import create_directory, read_metadata, get_relative_image_paths, load_images
@@ -62,7 +62,9 @@ create_directory('../data/') #refactor??
 #torch.save(images, '../data/images.pt')
 mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
 cprint("loaded images", logfile)
-#normalize_channels_inplace(images)
+
+# With the below command, we normalize all the images, image- and channel-wise.
+# Alternative, this can be uncommented and like in the Lafarge article, we can do batchwise normalization
 normalize_every_image_channels_seperately_inplace(images, verbose=True)
 cprint("normalized images", logfile)
 
@@ -119,10 +121,13 @@ print_every = 1
 
 best_elbo = np.finfo(np.float64).min
 
+
 for epoch in range(num_epochs):
     training_epoch_data = defaultdict(list)
     _ = vae.train()
     for x, _ in train_loader:
+        # batchwise normalization. Only to be used if imagewise normalization has been ocmmented out.
+        # x = batch_normalize_images(x)
         x = x.to(device)
         # perform a forward pass through the model and compute the ELBO
         loss, diagnostics, outputs = vi(vae, x)
@@ -132,7 +137,7 @@ for epoch in range(num_epochs):
         meh = nn.utils.clip_grad_norm_(vae.parameters(), 10_000)
         optimizer.step()
         for k, v in diagnostics.items():
-            training_epoch_data[k] += v.detach()
+            training_epoch_data[k] += list(v.cpu().data.numpy())
 
     for k, v in training_epoch_data.items():
         training_data[k] += [np.mean(training_epoch_data[k])]
@@ -143,12 +148,14 @@ for epoch in range(num_epochs):
         validation_epoch_data = defaultdict(list)
         
         for x, _ in validation_loader:
+            # batchwise normalization. Only to be used if imagewise normalization has been ocmmented out.
+            # x = batch_normalize_images(x)
             x = x.to(device)
             
             loss, diagnostics, outputs = vi(vae, x)
             
             for k, v in diagnostics.items():
-                validation_epoch_data[k] += v.detach()
+                validation_epoch_data[k] += list(v.cpu().data.numpy())
         
         for k, v in diagnostics.items():
             validation_data[k] += [np.mean(validation_epoch_data[k])]
