@@ -157,7 +157,7 @@ def NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2):
     return treatment_profiles_df['moa'], treatment_profiles_df['moa_pred']
 
     
-def moa_confusion_matrix(targets, predictions, mapping):
+def moa_confusion_matrix(targets, predictions):
     nb_classes = len(targets.unique())
     moa_classes = targets.sort_values().unique()
     classes = np.zeros((nb_classes, nb_classes))
@@ -166,16 +166,15 @@ def moa_confusion_matrix(targets, predictions, mapping):
             for t in range(len(targets)):
                 if targets[t] == moa_classes[i] and predictions[t] == moa_classes[j]:
                     classes[i,j] += 1
-    
-    cf_matrix = classes  
-    df_cm = pd.DataFrame(cf_matrix/np.sum(cf_matrix) *100, index = [i for i in mapping],
+    confusion_matrix = classes  
+    return confusion_matrix
+
+
+def plot_confusion_matrix(confusion_matrix, mapping):
+    df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
                          columns = [i for i in mapping])
-    return cf_matrix, df_cm
-
-
-def plot_confusion_matrix(confusion_matrix):
     plt.figure(figsize = (12,7))
-    sns.heatmap(confusion_matrix, annot=True)
+    sns.heatmap(df_cm, annot=True)
     
     
 def Accuracy(confusion_matrix):
