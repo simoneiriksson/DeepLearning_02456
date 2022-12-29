@@ -45,8 +45,8 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
 #### LOAD DATA ####
-#path = get_server_directory_path()                #use this for GitHub
-data_root  = "../data/mix_from_all/"           #use this for local PC
+data_root = get_server_directory_path()                #use this for GitHub
+#data_root  = "../data/mix_from_all/"           #use this for local PC
 metadata_all = read_metadata(data_root + "metadata.csv")
 
 metadata = shuffle_metadata(metadata_all)[:100000]
