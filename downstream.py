@@ -30,35 +30,35 @@ from models.VariationalInference_nonvar import VariationalInference_nonvar
 from models.LoadModels import *
 
 
-datetime=get_datetime()
-create_directory("dump/logs")
-logfile = open("./dump/logs/log_{}.log".format(datetime), "w")
-logfile=None
-
-def constant_seed(seed: int = 0):
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    np.random.seed(seed)
 constant_seed()
+datetime = get_datetime()
+downstream_folder = "dump/downstream_{}/".format(datetime)
+create_directory(downstream_folder)
+logfile = create_logfile(downstream_folder + "log.log")
+cprint("downstream_folder is: {}".format(downstream_folder), logfile)
+
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
 #### LOAD DATA ####
-data_root = get_server_directory_path()                #use this for GitHub
-#data_root  = "../data/mix_from_all/"           #use this for local PC
+data_root = get_server_directory_path()   #use this for GPU/HPC
+#data_root  = "../data/mix_from_all/"     #use this for local PC / ThinLinc
 metadata_all = read_metadata(data_root + "metadata.csv")
+metadata = shuffle_metadata(metadata_all)#[:100000]
 
-metadata = shuffle_metadata(metadata_all)[:100000]
-relative_path = get_relative_image_paths(metadata)
-image_paths = [data_root  + path for path in relative_path]
+####### use the 3 lines below for local PC / ThinLinc ########
+#relative_path = get_relative_image_paths(metadata)
 #image_paths = [data_root  + path for path in relative_path]
-images = load_images(image_paths, verbose=True, log_every=10000)
+#images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
+
+####### use line below for GPU/HPC ########
+images = torch.load("../data/images.pt")        #use this for GPU/HPC
+
 mapping = get_MOA_mappings(metadata)
 
 #### NORMALISE DATA ####
-normalize_channels_inplace(images)
-print(images.shape)
+normalize_every_image_channels_seperately_inplace(images, verbose=True)
 
 #### SPLIT DATA ####
 metadata_train_all, metadata_test = split_metadata(metadata, split_fraction = .90)
@@ -68,38 +68,47 @@ validation_set = SingleCellDataset(metadata_validation, images, mapping)
 test_set = SingleCellDataset(metadata_test, images, mapping)
 
 #### LOAD TRAINED MODEL ####
+# choose correct output folder for LoadVAEmodel() below!!!
 model_type  = "nonvar"
-#vae, validation_data, training_data, VAE_settings = LoadVAEmodel_old("./dump/outputs_2022-12-28 - 09-40-32/", model_type)
-vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-28 - 09-40-32/", model_type)
+vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-29 - 19-45-02/", model_type)
 
 
 #### PLOT MODEL PERFORMANCE####
-plot_VAE_performance(validation_data, title='VAE - validation')
-plot_VAE_performance(training_data, title='VAE - training')
+plot_VAE_performance(training_data, file=downstream_folder + "training_data.png", title='VAE - learning')
+plot_VAE_performance(validation_data, file=downstream_folder + "validation_data.png", title='VAE - validation')
 
 #### PLOT INPUT IMAGES AND RECONSTUCTIONS ####
+# choose number of images/reconstructions to plot: "n" below
 n = 1
 for i in range(10,n+10):
     x, y = train_set[i] 
     vae.eval()
     # plot input image sample
-    plot_image_channels(img_saturate(x), title="X's")
+    plot_image_channels(img_saturate(x), title="X's", file=downstream_folder + "x_{}.png".format(i))
     # extract model outputs for the input image
     outputs = vae(x[None,:,:,:])
     # extract reconstructed image(s) from model output
     x_reconstruction = outputs["x_hat"].detach()
     x_reconstruction = x_reconstruction[0]
     # plot reconstructed image
-    plot_image_channels(img_saturate(x_reconstruction), title="Reconstructions")
+    plot_image_channels(img_saturate(x_reconstruction.cpu()), file=downstream_folder + "x_reconstruction_{}.png".format(i))
+    
 
 #### PLOT INTERPOLATION OF RECONSTRUCTONS? (Cosine Similarity?)####
+# to be filled....
 
 
 #### PLOT LATENT SPACE HEATMAP ####
 # heatmap of (abs) correlations between latent variables and MOA classes
 batch_size= 10000
 metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
-heatmap(metadata_latent)
+heatmap = heatmap(metadata_latent)
+# plot heatmap
+plt.figure(figsize = (8,4))
+heat = sns.heatmap(heatmap)
+figure = heat.get_figure()
+plt.gcf()
+figure.savefig(downstream_folder + "latent_var_heatmap.png", bbox_inches = 'tight')
 
 
 #### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####
@@ -108,35 +117,14 @@ targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, mapping, 
 
 #### PLOT CONFUSION MATRIX ####
 confusion_matrix = moa_confusion_matrix(targets, predictions)
-plot_confusion_matrix(confusion_matrix, mapping)
+df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
+                         columns = [i for i in mapping])
+plt.figure(figsize = (12,7))
+cm = sns.heatmap(df_cm, annot=True)
+figure = cm.get_figure()
+plt.gcf()
+figure.savefig(downstream_folder + "conf_matrix.png", bbox_inches = 'tight')
 
 
 #### PRINT ACCURACY ####
 print("Model Accuracy:", Accuracy(confusion_matrix))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
