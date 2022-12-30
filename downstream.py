@@ -70,6 +70,7 @@ test_set = SingleCellDataset(metadata_test, images, mapping)
 #### LOAD TRAINED MODEL ####
 # choose correct output folder for LoadVAEmodel() below!!!
 model_type  = "nonvar"
+#vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-28 - 09-40-32/", model_type)
 vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-29 - 19-45-02/", model_type)
 
 
@@ -79,7 +80,7 @@ plot_VAE_performance(validation_data, file=downstream_folder + "validation_data.
 
 #### PLOT INPUT IMAGES AND RECONSTUCTIONS ####
 # choose number of images/reconstructions to plot: "n" below
-n = 1
+n = 3
 for i in range(10,n+10):
     x, y = train_set[i] 
     vae.eval()
@@ -95,7 +96,17 @@ for i in range(10,n+10):
     
 
 #### PLOT INTERPOLATION OF RECONSTRUCTONS? (Cosine Similarity?)####
-# to be filled....
+#treatments list
+tl = metadata['Treatment'].sort_values().unique()
+#choosing the (target) treatment to plot
+target = tl[0]  #'ALLN_100.0'
+model = "../dump/outputs_2022-12-28 - 09-40-32/"
+model_type = "nonvar"
+filefolder = "../" + downstream_folder + "latent_interpolation.png"
+plot_cosine_similarity(target, metadata_latent, 
+                        model, 
+                        model_type,
+                        filefolder)
 
 
 #### PLOT LATENT SPACE HEATMAP ####
