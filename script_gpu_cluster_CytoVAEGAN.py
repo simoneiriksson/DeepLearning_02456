@@ -27,7 +27,7 @@ from utils.data_transformers import SingleCellDataset
 from utils.plotting import plot_VAE_performance, plot_image_channels
 from utils.training import create_directory, read_metadata, get_relative_image_paths, load_images
 from utils.training import get_MOA_mappings, shuffle_metadata, split_metadata
-from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
+from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString, DiscStatusString
 from utils.data_preparation import get_server_directory_path
 import importlib
 ######### Utilities #########
@@ -43,12 +43,12 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 ########## loading data #########
 
-path = get_server_directory_path()
-#path = "../data/all/"
+#path = get_server_directory_path()
+path = "../data/all/"
 
 #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
 metadata = read_metadata(path + "metadata.csv") #refactor? dtype=dataframe
-metadata =shuffle_metadata(metadata)[:10000]
+metadata =shuffle_metadata(metadata)[:200]
 cprint("loaded metadata",logfile)
 
 cprint("loading images", logfile)
@@ -78,7 +78,7 @@ cprint("VAE Configs", logfile)
 
 # Config CytoVAE
 params_VAEGAN = {
-    'num_epochs' : 50,
+    'num_epochs' : 10,
     'batch_size' : min(64, len(train_set)),
     'learning_rate' : 1e-3,
     'weight_decay' : 1e-3,
@@ -114,19 +114,24 @@ print_every = 1
 
 beta = params_VAEGAN['beta']
 
+
+
 for epoch in range(num_epochs):
     training_epoch_data = defaultdict(list)
+    disc_training_epoch_data = defaultdict(list)
+    disc_data = defaultdict(list)
+
     _ = CytoVAE.train()
     _ = DISCmodel.train()
     for x, _ in train_loader:
         x = x.to(device)
-        losses, outputs = vi_VAEGAN(CytoVAE, DISCmodel, x)
+        losses_mean, losses, outputs = vi_VAEGAN(CytoVAE, DISCmodel, x)
 
         # unfolding losses:
-        image_loss = losses['image_loss']
-        kl_div = losses['kl_div']
-        disc_loss = losses['disc_loss']
-        disc_repr_loss = losses['disc_repr_loss']
+        image_loss = losses_mean['image_loss']
+        kl_div = losses_mean['kl_div']
+        disc_loss = losses_mean['disc_loss']
+        disc_repr_loss = losses_mean['disc_repr_loss']
 
         loss_VAE = disc_repr_loss + image_loss + kl_div * 1.0
 
@@ -143,42 +148,69 @@ for epoch in range(num_epochs):
         #_ = nn.utils.clip_grad_norm_(DISCmodel.parameters(), 1_000)
 
         DISCmodel_optimizer.step()
-        
+
         for k, v in losses.items():
-            training_epoch_data[k] += [v.cpu().data.float()]
-        
+            training_epoch_data[k] += list(v.cpu().data.numpy())
+        disc_data['disc_false_negatives'] = (1 - outputs['disc_real_pred'])
+        disc_data['disc_true_positives'] = outputs['disc_real_pred']
+        disc_data['disc_true_negatives'] = (1 - outputs['disc_fake_pred'])
+        disc_data['disc_false_positives'] = outputs['disc_fake_pred']
+        for k, v in disc_data.items():
+            disc_training_epoch_data[k] += list(v.cpu().data.numpy())
+
     for k, v in training_epoch_data.items():
         training_data[k] += [np.mean(training_epoch_data[k])]
+    for k, v in disc_training_epoch_data.items():
+        training_data[k] += [np.sum(disc_training_epoch_data[k])]
 
     with torch.no_grad():
         validation_epoch_data = defaultdict(list)
+        disc_validation_epoch_data = defaultdict(list)
         _ = CytoVAE.eval()
         _ = DISCmodel.eval()        
         for x, _ in validation_loader:
             # batchwise normalization. Only to be used if imagewise normalization has been ocmmented out.
             # x = batch_normalize_images(x)
             x = x.to(device)
-            losses, outputs = vi_VAEGAN(CytoVAE, DISCmodel, x)
+            losses_mean, losses, outputs = vi_VAEGAN(CytoVAE, DISCmodel, x)
+
             # unfolding losses:
-            image_loss = losses['image_loss']
-            kl_div = losses['kl_div']
-            disc_loss = losses['disc_loss']
-            disc_repr_loss = losses['disc_repr_loss']
+            image_loss = losses_mean['image_loss']
+            kl_div = losses_mean['kl_div']
+            disc_loss = losses_mean['disc_loss']
+            disc_repr_loss = losses_mean['disc_repr_loss']
             loss_VAE = disc_repr_loss + image_loss + kl_div * 1.0
             loss_discriminator = disc_repr_loss
 
             for k, v in losses.items():
-                validation_epoch_data[k] += [v.cpu().data.float()]
-        
+                validation_epoch_data[k] += list(v.cpu().data.numpy())
+            disc_data['disc_false_negatives'] = (1 - outputs['disc_real_pred'])
+            disc_data['disc_true_positives'] = outputs['disc_real_pred']
+            disc_data['disc_true_negatives'] = (1 - outputs['disc_fake_pred'])
+            disc_data['disc_false_positives'] = outputs['disc_fake_pred']
+            for k, v in disc_data.items():
+                disc_validation_epoch_data[k] += list(v.cpu().data.numpy())
+
         for k, v in validation_epoch_data.items():
             validation_data[k] += [np.mean(validation_epoch_data[k])]
-            
+        
+        for k, v in disc_validation_epoch_data.items():
+            validation_data[k] += [np.sum(disc_validation_epoch_data[k])]
+        
         if epoch % print_every == 0:
+            cprint("\n", logfile)
             cprint(f"epoch: {epoch}/{num_epochs}", logfile)
             train_string = StatusString("training", training_epoch_data)
             evalString = StatusString("evaluation", validation_epoch_data)
             cprint(train_string, logfile)
             cprint(evalString, logfile)
+
+            train_string = DiscStatusString("training Discriminator accurracy", disc_training_epoch_data)
+            evalString = DiscStatusString("evaluation Discriminator accurracy", disc_validation_epoch_data)
+            cprint(train_string, logfile)
+            cprint(evalString, logfile)
+
+
             #cprint("vi.beta: {}".format(vi.beta), logfile)
             #cprint("vi.alpha: {}".format(vi.alpha), logfile)        
 
@@ -205,7 +237,7 @@ create_directory(output_folder + "images")
 
 _ = CytoVAE.eval() # because of batch normalization
 plot_VAE_performance(training_data, file=output_folder + "images/training_data.png", title='VAE - learning')
-#plot_VAE_performance(validation_data, file=output_folder + "images/validation_data.png", title='VAE - validation')
+plot_VAE_performance(validation_data, file=output_folder + "images/validation_data.png", title='VAE - validation')
 
 n = 10
 for i in range(n):

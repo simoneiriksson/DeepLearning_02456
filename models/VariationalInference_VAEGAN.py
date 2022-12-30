@@ -25,6 +25,8 @@ class VariationalInference_VAEGAN(nn.Module):
         
         _, disc_repr_x = DISC(x)
         _, disc_repr_x_hat = DISC(x_hat)
+        outputs['disc_repr_x'] = disc_repr_x
+        outputs['disc_repr_x_hat'] = disc_repr_x_hat
 
         # KL-divergence calculated explicitly
         kl_div = - (.5 * (1 + (qz_sigma ** 2).log() - qz_mu ** 2 - qz_sigma**2)).sum(axis=[1])
@@ -54,6 +56,11 @@ class VariationalInference_VAEGAN(nn.Module):
         # Discriminator loss
         disc_x_d, _ = DISC(x.detach())
         disc_x_hat_d, _ = DISC(x_hat.detach())
+        outputs['disc_x_d'] = disc_x_d
+        outputs['disc_x_hat_d'] = disc_x_hat_d
+        
+        outputs['disc_real_pred'] = disc_x_d.round()
+        outputs['disc_fake_pred'] = disc_x_hat_d.round()        
 
         disc_groundtruth = torch.concat((torch.ones_like(disc_x_d, ), torch.zeros_like(disc_x_hat_d)))
         disc_cat = torch.concat((disc_x_d, disc_x_hat_d))
@@ -78,11 +85,17 @@ class VariationalInference_VAEGAN(nn.Module):
         
 
         with torch.no_grad():
-            losses = {
+            losses_mean = {
                 'image_loss': image_loss_mean,
                 'kl_div': kl_div_mean,
                 'disc_loss': disc_loss_mean,
                 'disc_repr_loss': disc_repr_loss_mean
                 }
-        return losses, outputs
+            losses = {
+                'image_loss': image_loss,
+                'kl_div': kl_div,
+                'disc_loss': disc_loss,
+                'disc_repr_loss': disc_repr_loss
+                }
+        return losses_mean, losses, outputs
       
