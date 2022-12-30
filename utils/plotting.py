@@ -138,7 +138,7 @@ def heatmap(metadata_latent):
     latent_cols = [col for col in metadata_onehot.columns if type(col)==str and col[0:7]=='latent_']
     one_hot_cols = [col for col in metadata_onehot.columns if type(col)==str and col[0:7]=='onehot_']
     heatmap_matrix = metadata_onehot[one_hot_cols + latent_cols].corr().filter(items=one_hot_cols, axis=0)[latent_cols]
-    return plt.matshow(heatmap_matrix.abs())
+    return heatmap_matrix.abs()
    
 
 def NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2):
@@ -170,11 +170,10 @@ def moa_confusion_matrix(targets, predictions):
     return confusion_matrix
 
 
-def plot_confusion_matrix(confusion_matrix, mapping):
+def df_moa_confusion_matrix(confusion_matrix, mapping):
     df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
                          columns = [i for i in mapping])
-    plt.figure(figsize = (12,7))
-    sns.heatmap(df_cm, annot=True)
+    return df_cm
     
     
 def Accuracy(confusion_matrix):
