@@ -43,14 +43,9 @@ cprint(f"Using device: {device}", logfile)
 
 #### LOAD DATA ####
 data_root = get_server_directory_path()   #use this for GPU/HPC
-#data_root  = "../data/mix_from_all/"     #use this for local PC / ThinLinc
 metadata_all = read_metadata(data_root + "metadata.csv")
-metadata = shuffle_metadata(metadata_all)#[:100000]
 
 ####### use the 3 lines below for local PC / ThinLinc ########
-#relative_path = get_relative_image_paths(metadata)
-#image_paths = [data_root  + path for path in relative_path]
-#images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
 
 ####### use line below for GPU/HPC ########
 images = torch.load("../data/images.pt")        #use this for GPU/HPC
@@ -71,8 +66,17 @@ test_set = SingleCellDataset(metadata_test, images, mapping)
 # choose correct output folder for LoadVAEmodel() below!!!
 model_type  = "nonvar"
 #vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-28 - 09-40-32/", model_type)
-vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-29 - 19-45-02/", model_type)
+#vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-29 - 19-45-02/", model_type)
+model, validation_data, training_data, params, vi = LoadVAEmodel("./dump/outputs_2022-12-30 - 17-07-33/")
 
+cprint("model is of type {}".format(params['model_type']), logfile)
+cprint("model parameters are: {}".format(params), logfile)
+
+if type(model)==list:
+    vae=model[0]
+    gan=model[1]
+    print("meh")
+else: vae=model
 
 #### PLOT MODEL PERFORMANCE####
 plot_VAE_performance(training_data, file=downstream_folder + "training_data.png", title='VAE - learning')
@@ -83,7 +87,7 @@ plot_VAE_performance(validation_data, file=downstream_folder + "validation_data.
 n = 3
 for i in range(10,n+10):
     x, y = train_set[i] 
-    vae.eval()
+    _=vae.eval()
     # plot input image sample
     plot_image_channels(img_saturate(x), title="X's", file=downstream_folder + "x_{}.png".format(i))
     # extract model outputs for the input image
