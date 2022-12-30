@@ -4,6 +4,12 @@ import torch
 from models.PrintSize import PrintSize
 from typing import List, Set, Dict, Tuple, Optional, Any
 
+
+class MyClamp(nn.Module):
+    def forward(self, x):
+        return torch.clamp(x, -10, 10)
+
+
 class DISC(nn.Module):
 
     def __init__(self, input_shape, latent_features: int) -> None:
@@ -59,6 +65,7 @@ class DISC(nn.Module):
             nn.Conv2d(in_channels=64, out_channels=1, kernel_size=1, padding=0),
             PrintSize(),
             nn.Flatten(),
+            MyClamp(),
             nn.Sigmoid()
         )
 
