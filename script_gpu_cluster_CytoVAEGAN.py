@@ -84,7 +84,7 @@ params_VAEGAN = {
     'weight_decay' : 1e-3,
     'image_shape' : np.array([3, 68, 68]),
     'latent_features' : 256,
-    'model_type' : "Cyto_VAEGAN",
+    'model_type' : "SparseVAEGAN",
     'alpha': 0.05, 
     'alpha_max': 0.05,
     'beta': 0.5, 
@@ -92,13 +92,12 @@ params_VAEGAN = {
     'p_norm': 2
     }
 
-
-[CytoVAE, DISCmodel], validation_data, training_data, params, vi_VAEGAN = initVAEmodel(params_VAEGAN)
+[VAE, DISCmodel], validation_data, training_data, params, vi_VAEGAN = initVAEmodel(params_VAEGAN)
 cprint("params: {}".format(params_VAEGAN), logfile)
-CytoVAE = CytoVAE.to(device)
+VAE = VAE.to(device)
 DISCmodel = DISCmodel.to(device)
 
-CytoVAE_optimizer = torch.optim.Adam(CytoVAE.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
+VAE_optimizer = torch.optim.Adam(VAE.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
 DISCmodel_optimizer = torch.optim.Adam(DISCmodel.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
 
 train_loader = DataLoader(train_set, batch_size=params_VAEGAN['batch_size'], shuffle=True, num_workers=0, drop_last=True)
@@ -121,11 +120,11 @@ for epoch in range(num_epochs):
     disc_training_epoch_data = defaultdict(list)
     disc_data = defaultdict(list)
 
-    _ = CytoVAE.train()
+    _ = VAE.train()
     _ = DISCmodel.train()
     for x, _ in train_loader:
         x = x.to(device)
-        losses_mean, losses, outputs = vi_VAEGAN(CytoVAE, DISCmodel, x)
+        losses_mean, losses, outputs = vi_VAEGAN(VAE, DISCmodel, x)
 
         # unfolding losses:
         image_loss = losses_mean['image_loss']
@@ -135,10 +134,10 @@ for epoch in range(num_epochs):
 
         loss_VAE = disc_repr_loss + image_loss + kl_div * 1.0
 
-        CytoVAE_optimizer.zero_grad()
+        VAE_optimizer.zero_grad()
         loss_VAE.backward()
         #_ = nn.utils.clip_grad_norm_(CytoVAE.parameters(), 1_000)
-        CytoVAE_optimizer.step()
+        VAE_optimizer.step()
 
         loss_discriminator = disc_loss
 
@@ -166,13 +165,13 @@ for epoch in range(num_epochs):
     with torch.no_grad():
         validation_epoch_data = defaultdict(list)
         disc_validation_epoch_data = defaultdict(list)
-        _ = CytoVAE.eval()
+        _ = VAE.eval()
         _ = DISCmodel.eval()        
         for x, _ in validation_loader:
             # batchwise normalization. Only to be used if imagewise normalization has been ocmmented out.
             # x = batch_normalize_images(x)
             x = x.to(device)
-            losses_mean, losses, outputs = vi_VAEGAN(CytoVAE, DISCmodel, x)
+            losses_mean, losses, outputs = vi_VAEGAN(VAE, DISCmodel, x)
 
             # unfolding losses:
             image_loss = losses_mean['image_loss']
@@ -214,7 +213,7 @@ for epoch in range(num_epochs):
             #cprint("vi.beta: {}".format(vi.beta), logfile)
             #cprint("vi.alpha: {}".format(vi.alpha), logfile)        
 
-    CytoVAE.update_()
+    VAE.update_()
     DISCmodel.update_()
     vi_VAEGAN.update_vi()
 
@@ -225,7 +224,7 @@ cprint("Save VAE parameters", logfile)
 
 datetime = get_datetime()
 
-torch.save(CytoVAE.state_dict(), output_folder + "vae_parameters.pt")
+torch.save(VAE.state_dict(), output_folder + "vae_parameters.pt")
 torch.save(DISCmodel.state_dict(), output_folder + "disc_parameters.pt")
 torch.save(validation_data, output_folder + "validation_data.pt")
 torch.save(training_data, output_folder + "training_data.pt")
@@ -235,7 +234,7 @@ torch.save(params, output_folder + "params.pt")
 cprint("Extract a few images already", logfile)
 create_directory(output_folder + "images")
 
-_ = CytoVAE.eval() # because of batch normalization
+_ = VAE.eval() # because of batch normalization
 plot_VAE_performance(training_data, file=output_folder + "images/training_data.png", title='VAE - learning')
 plot_VAE_performance(validation_data, file=output_folder + "images/validation_data.png", title='VAE - validation')
 
@@ -245,7 +244,7 @@ for i in range(n):
     plot_image_channels(x, file=output_folder + "images/x_{}.png".format(i))
     #plot_image_channels(x)
     x = x.to(device)
-    outputs = CytoVAE(x[None,:,:,:])
+    outputs = VAE(x[None,:,:,:])
     x_hat = outputs["x_hat"]
     x_reconstruction = x_hat
     x_reconstruction = x_reconstruction[0].detach()

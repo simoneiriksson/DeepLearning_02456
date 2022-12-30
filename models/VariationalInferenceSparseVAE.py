@@ -6,17 +6,13 @@ import math
 
 
 class VariationalInferenceSparseVAE(nn.Module):
-    def __init__(self, beta:float=1., alpha:float=0.0, alpha_increase:float=0.1, alpha_max:float=0.5, beta_increase:float=0.5):
+    def __init__(self, beta:float=1., alpha:float=0.0):
         super().__init__()
         self.beta = beta
         self.alpha = alpha        
-        self.beta_increase = beta_increase
-        self.alpha_increase = alpha_increase
-        self.alpha_max = alpha_max
     
     def update_vi(self):
-        self.beta = self.beta_increase + self.beta
-        self.alpha = min(self.alpha_increase + self.alpha, self.alpha_max)
+        pass
 
     def forward(self, model:nn.Module, x:Tensor) -> Tuple[Tensor, Dict]:
         outputs = model(x)

@@ -12,7 +12,7 @@ from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
 from models.VariationalInference_nonvar import VariationalInference_nonvar
 from models.VariationalInference import VariationalInference
 from models.VariationalInference_VAEGAN import VariationalInference_VAEGAN
-
+from models.VariationalInference_SparseVAEGAN import VariationalInference_SparseVAEGAN
 
 def LoadVAEmodel(folder, model_type=None, device="cpu"):
     params = torch.load(folder + "params.pt", map_location=torch.device(device))
@@ -42,6 +42,16 @@ def LoadVAEmodel(folder, model_type=None, device="cpu"):
         if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
         else: p_norm = 2
         vi = VariationalInference_VAEGAN(p_norm = p_norm)
+
+    if model_type == 'SparseVAEGAN':
+        vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        disc = DISC(params['image_shape'], params['latent_features'])
+        vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
+        disc.load_state_dict(torch.load(folder + "disc_parameters.pt", map_location=torch.device(device)))
+        model = [vae, disc]
+        if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
+        else: p_norm = 2
+        vi = VariationalInference_SparseVAEGAN(p_norm = p_norm)
 
 
     if model_type == 'basic':
@@ -87,6 +97,14 @@ def initVAEmodel(params):
         else: p_norm = 2
         vi = VariationalInference_VAEGAN(p_norm = p_norm)
 
+    if model_type == 'SparseVAEGAN':
+        vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        disc = DISC(params['image_shape'], params['latent_features'])
+        model = [vae, disc]
+        if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
+        else: p_norm = 2
+        vi = VariationalInference_SparseVAEGAN(p_norm = p_norm, beta=params['beta'], alpha=params['alpha'])
+
     if model_type == 'basic':
         model = VariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference(beta=params['beta'])
@@ -97,7 +115,7 @@ def initVAEmodel(params):
 
     if model_type == 'SparseVAE':
         model = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
-        vi = VariationalInference_nonvar(beta=params['beta'])
+        vi = VariationalInference_nonvar(beta=params['beta'], alpha=params['alpha'])
     
     return model, validation_performance, training_performance, params, vi
 
