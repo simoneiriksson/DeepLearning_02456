@@ -65,6 +65,7 @@ def treatment_profiles(nm):
     latent_cols = [col for col in nm.columns if type(col)==str and col[0:7]=='latent_']
     mean_over_treatment_well_unique = nm.groupby(['Treatment', 'Image_Metadata_Compound', 'Image_Metadata_Concentration','Well_unique', 'moa'], as_index=False).mean()
     median_over_treatment = mean_over_treatment_well_unique.groupby(['Treatment', 'Image_Metadata_Compound', 'Image_Metadata_Concentration', 'moa'], as_index=False).median()
+    median_over_treatment = median_over_treatment.set_index('Treatment')
     return median_over_treatment
 
 # function to get the cell closest to each Treatment profile
@@ -76,11 +77,13 @@ def treatment_center_cells(df,treatment_profiles,p=2):
         diffs_sum = diffs.sum(axis=1)**(1/p)
         diffs_min = diffs_sum.min()
         tcc.append(diffs[diffs_sum == diffs_min].index[0])
+    #tcc = df.loc[tcc]    
+    #tcc = tcc.set_index('Treatment')
     return df.loc[tcc]
 
 
 # Compount/Concentration Profiles
-def CC_Profile(nm):
+def cc_profile(nm):
     latent_cols = [col for col in df.columns if type(col)==str and col[0:7]=='latent_']
     cc =  nm.groupby(['Image_Metadata_Compound','Image_Metadata_Concentration']).median()[latent_cols]
     return cc
