@@ -41,16 +41,14 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
-
-
 ########## loading data #########
 
-#path = get_server_directory_path()
-path = "../data/all/"
+path = get_server_directory_path()
+#path = "../data/all/"
 
 #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
 metadata = read_metadata(path + "metadata.csv") #refactor? dtype=dataframe
-metadata =shuffle_metadata(metadata)[:1000]
+metadata =shuffle_metadata(metadata)[:10000]
 cprint("loaded metadata",logfile)
 
 cprint("loading images", logfile)
@@ -80,7 +78,7 @@ cprint("VAE Configs", logfile)
 
 # Config CytoVAE
 params_VAEGAN = {
-    'num_epochs' : 10,
+    'num_epochs' : 50,
     'batch_size' : min(64, len(train_set)),
     'learning_rate' : 1e-3,
     'weight_decay' : 1e-3,
@@ -91,7 +89,7 @@ params_VAEGAN = {
     'alpha_max': 0.05,
     'beta': 0.5, 
     'beta_max': 1,
-    'p_norm': 1.1
+    'p_norm': 2
     }
 
 
@@ -133,14 +131,17 @@ for epoch in range(num_epochs):
         loss_VAE = disc_repr_loss + image_loss + kl_div * 1.0
 
         CytoVAE_optimizer.zero_grad()
-        _ = nn.utils.clip_grad_norm_(CytoVAE.parameters(), 10_000)
         loss_VAE.backward()
+        #_ = nn.utils.clip_grad_norm_(CytoVAE.parameters(), 1_000)
         CytoVAE_optimizer.step()
 
         loss_discriminator = disc_loss
 
-        DISCmodel_optimizer.zero_grad()        
+        DISCmodel_optimizer.zero_grad()    
+            
         loss_discriminator.backward()
+        #_ = nn.utils.clip_grad_norm_(DISCmodel.parameters(), 1_000)
+
         DISCmodel_optimizer.step()
         
         for k, v in losses.items():

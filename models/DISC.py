@@ -1,6 +1,7 @@
 import numpy as np
 from torch import nn, Tensor
 import torch
+from models.PrintSize import PrintSize
 from typing import List, Set, Dict, Tuple, Optional, Any
 
 class DISC(nn.Module):
@@ -13,6 +14,7 @@ class DISC(nn.Module):
         self.input_channels = input_shape[0]
 
         self.level0 = nn.Sequential(
+            PrintSize(),
             # now we are at 68h * 68w * 3ch
             nn.Conv2d(in_channels=self.input_channels, out_channels=32, kernel_size=5, padding=0),
             # Now we are at: 64h * 64w * 32ch
@@ -20,6 +22,7 @@ class DISC(nn.Module):
             nn.LeakyReLU(negative_slope=0.01))
 
         self.level1 = nn.Sequential(
+            PrintSize(),
             nn.BatchNorm2d(32),
             # Now we are at: 32h * 32w * 32ch
             nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, padding=0),
@@ -29,6 +32,7 @@ class DISC(nn.Module):
             nn.LeakyReLU(negative_slope=0.01))
 
         self.level2 = nn.Sequential(
+            PrintSize(),
             nn.BatchNorm2d(32),
             nn.Conv2d(in_channels=32, out_channels=32, kernel_size=5, padding=0),
             # Now we are at: 10h * 10w * 32ch
@@ -38,6 +42,7 @@ class DISC(nn.Module):
             )
 
         self.level3 = nn.Sequential(
+            PrintSize(),
             nn.BatchNorm2d(32),
             ##Output should be 5*5*32 now.
             nn.Conv2d(in_channels=32, out_channels=64, kernel_size=5, padding=0),
@@ -46,9 +51,14 @@ class DISC(nn.Module):
             nn.BatchNorm2d(64))
 
         self.level4 = nn.Sequential(
-            nn.Flatten(),
+            PrintSize(),
+            #nn.Flatten(),
+            PrintSize(),
             nn.LeakyReLU(negative_slope=0.01),
-            nn.Linear(64, 1),
+            #nn.Linear(in_features=64, out_features=1),
+            nn.Conv2d(in_channels=64, out_channels=1, kernel_size=1, padding=0),
+            PrintSize(),
+            nn.Flatten(),
             nn.Sigmoid()
         )
 
