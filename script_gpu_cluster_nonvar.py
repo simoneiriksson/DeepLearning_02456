@@ -46,12 +46,12 @@ cprint(f"Using device: {device}", logfile)
 #######
 # ## loading data #########
 
-#path = get_server_directory_path()
-path = "../data/all/"
+path = get_server_directory_path()
+#path = "../data/all/"
 
 #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
 metadata = read_metadata(path + "metadata.csv") #refactor? dtype=dataframe
-metadata =shuffle_metadata(metadata)[:100]
+#metadata =shuffle_metadata(metadata)[:10000]
 cprint("loaded metadata",logfile)
 
 cprint("loading images", logfile)
@@ -60,7 +60,6 @@ image_paths = [path + relative for relative in relative_paths] #absolute path
 images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
 #images = torch.load("../data/images.pt") #TODO SIZE OF TENSOR??
 #create_directory('../data/') #refactor?? 
-#torch.save(images, '../data/images.pt')
 mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
 cprint("loaded images", logfile)
 

@@ -36,10 +36,10 @@ class VariationalInference(nn.Module):
         #log_qz = reduce(qz.log_prob(z))
         
         #kl = log_qz - log_pz
-
+        # Reference Kingma & Welling p. 5 bottom
         kl = - (.5 * (1 + (qz.sigma ** 2).log() - qz.mu ** 2 - qz.sigma**2)).sum(axis=[1])
         #elbo = log_px - kl
-        beta_elbo = log_px - self.beta*kl
+        beta_elbo = log_px - self.beta * kl
         
         # loss
         loss = -beta_elbo.mean()

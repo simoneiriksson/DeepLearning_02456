@@ -29,6 +29,7 @@ class VariationalInference_nonvar(nn.Module):
         image_loss = ((x_hat - x).abs()**self.p_norm).sum(axis=[1,2,3])
 
         # KL-divergence calculated explicitly
+        # Reference Kingma & Welling p. 5 bottom
         kl = - (.5 * (1 + (qz_sigma ** 2).log() - qz_mu ** 2 - qz_sigma**2)).sum(axis=[1])
 
         # Image-wise beta-elbo:
