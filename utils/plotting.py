@@ -169,12 +169,6 @@ def moa_confusion_matrix(targets, predictions):
     confusion_matrix = classes  
     return confusion_matrix
 
-
-def df_moa_confusion_matrix(confusion_matrix, mapping):
-    df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
-                         columns = [i for i in mapping])
-    return df_cm
-    
     
 def Accuracy(confusion_matrix):
     class_accuracy = 100*confusion_matrix.diagonal()/confusion_matrix.sum(1)
