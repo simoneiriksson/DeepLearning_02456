@@ -6,10 +6,12 @@ import numpy as np
 from models.CytoVariationalAutoencoder import CytoVariationalAutoencoder
 from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar
 from models.VariationalAutoencoder import VariationalAutoencoder
+from models.DISC import DISC
 from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
 from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
 from models.VariationalInference_nonvar import VariationalInference_nonvar
 from models.VariationalInference import VariationalInference
+from models.VariationalInference_VAEGAN import VariationalInference_VAEGAN
 
 
 def LoadVAEmodel(folder, model_type=None, device="cpu"):
@@ -19,27 +21,47 @@ def LoadVAEmodel(folder, model_type=None, device="cpu"):
     training_data = torch.load(folder + "training_data.pt", map_location=torch.device(device))
     
     model_type = params['model_type']
+    
     if (model_type == None) or model_type == "Cyto":
-        vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
+    
     if model_type == 'Cyto_nonvar':
-        vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        model = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
         else: p_norm = 2
         vi = VariationalInference_nonvar(beta=params['beta'], p_norm = p_norm)
+
+    if model_type == 'Cyto_VAEGAN':
+        vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        disc = DISC(params['image_shape'], params['latent_features'])
+        vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
+        disc.load_state_dict(torch.load(folder + "disc_parameters.pt", map_location=torch.device(device)))
+        model = [vae, disc]
+        if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
+        else: p_norm = 2
+        vi = VariationalInference_VAEGAN(p_norm = p_norm)
+
+
     if model_type == 'basic':
-        vae = VariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = VariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         vi = VariationalInference(beta=params['beta'])
+    
     if model_type == 'Conv_simon':
-        vae = ConvVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = ConvVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         vi = VariationalInference_nonvar(beta=params['beta'])
+
     if model_type == 'SparseVAE':
-        vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         vi = VariationalInference_nonvar(beta=params['beta'])
     
-    vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
-    return vae, validation_data, training_data, params, vi
+    return model, validation_data, training_data, params, vi
 
-
+# Change model loader to return GAN/VAE couple
 def initVAEmodel(params):
 
     model_type = params['model_type']
@@ -48,26 +70,36 @@ def initVAEmodel(params):
     validation_performance = defaultdict(list)
 
     if (model_type == None) or model_type == "Cyto":
-        vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference(beta=params['beta'])
+
     if model_type == 'Cyto_nonvar':
-        vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        model = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
         if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
         else: p_norm = 2
         vi = VariationalInference_nonvar(beta=params['beta'], p_norm = p_norm)
+
+    if model_type == 'Cyto_VAEGAN':
+        vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        disc = DISC(params['image_shape'], params['latent_features'])
+        model = [vae, disc]
+        if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
+        else: p_norm = 2
+        vi = VariationalInference_VAEGAN(p_norm = p_norm)
+
     if model_type == 'basic':
-        vae = VariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = VariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference(beta=params['beta'])
+
     if model_type == 'Conv_simon':
-        vae = ConvVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = ConvVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference_nonvar(beta=params['beta'])
+
     if model_type == 'SparseVAE':
-        vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
+        model = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference_nonvar(beta=params['beta'])
     
-    return vae, validation_performance, training_performance, params, vi
-
-
+    return model, validation_performance, training_performance, params, vi
 
 
 def initVAEmodel_old(latent_features= 256,
