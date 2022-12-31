@@ -79,7 +79,7 @@ params_VAEGAN = {
     'model_type' : "Cyto_VAEGAN",
     'alpha': 0.05, 
     'beta': 0.5, 
-    'p_norm': 2
+    'p_norm': 2.0
     }
 
 [VAE, DISCmodel], validation_data, training_data, params, vi_VAEGAN = initVAEmodel(params_VAEGAN)
@@ -126,7 +126,7 @@ for epoch in range(num_epochs):
 
         VAE_optimizer.zero_grad()
         loss_VAE.backward()
-        #_ = nn.utils.clip_grad_norm_(CytoVAE.parameters(), 1_000)
+        _ = nn.utils.clip_grad_norm_(VAE.parameters(), 1_000)
         VAE_optimizer.step()
 
         loss_discriminator = disc_loss

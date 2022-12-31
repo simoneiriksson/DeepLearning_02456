@@ -6,11 +6,12 @@ import math
 
 
 class VariationalInference_SparseVAE(nn.Module):
-    def __init__(self, beta:float=1., alpha:float=0.1):
+    def __init__(self, p_norm = 2., beta:float=1., alpha:float=0.0):
         super().__init__()
         self.beta = beta
         self.alpha = alpha        
-    
+        self.p_norm = float(p_norm)
+
     def update_vi(self):
         pass
 
@@ -33,23 +34,9 @@ class VariationalInference_SparseVAE(nn.Module):
         KL_part3 = qz_gamma.mul((self.alpha/qz_gamma).log())
     
     
-#        meh = torch.log((1 - qz_gamma)/(1 - self.alpha))
-#        meh2 = 1 - qz_gamma
-#        print("torch.log((1 - qz_gamma)/(1 - self.alpha) number of nans", meh.isnan().sum(axis=[1]))
-#        print("(1 - qz_gamma) number of nans", meh2.isnan().sum(axis=[1]))
-#        print("KL_part1 number of nans", KL_part1.isnan().sum(axis=[1]))
-#        print("KL_part2 number of nans", KL_part2.isnan().sum(axis=[1]))
-#        print("KL_part3 number of nans", KL_part3.isnan().sum(axis=[1]))
-#        print("qz_gamma number of nans", qz_gamma.isnan().sum(axis=[1]))
-        
-#        print("(1 - qz_gamma)/(1 - self.alpha))==0 number of: ", (((1 - qz_gamma)/(1 - self.alpha))==0).sum(axis=[1]))
-#        print("qz_gamma", qz_gamma)
         KL = -(KL_part1 + KL_part2 + KL_part3).sum(axis=[1])
-#        print("KL", KL)
-#        print("KL.shape", KL.shape)
         
-        mse_loss = ((x_hat - x)**2).sum(axis=[1,2,3])
-#        print("mse_loss.shape", mse_loss.shape)
+        mse_loss = ((x_hat - x)**self.p_norm).sum(axis=[1,2,3])
 
         beta_elbo = -self.beta * KL - mse_loss
 

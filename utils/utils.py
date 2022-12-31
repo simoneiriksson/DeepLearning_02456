@@ -44,3 +44,11 @@ def DiscStatusString(pretext = None, data=None, file=None):
     for key in data.keys():
         outstring += "{}: {:.4f}, \t".format(key, np.sum(data[key]))
     return outstring
+
+def save_model(models, validation_data, training_data, params, folder):
+    if len(models)==2:
+            torch.save(models[1].state_dict(), folder + "/disc_parameters.pt")
+    torch.save(models[0].state_dict(), folder + "/vae_parameters.pt")
+    torch.save(validation_data, folder + "/validation_data.pt")
+    torch.save(training_data, folder + "/training_data.pt")
+    torch.save(params, folder + "/params.pt")

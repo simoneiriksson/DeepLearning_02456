@@ -8,9 +8,11 @@ import math
 
 
 class VariationalInference_VAEGAN(nn.Module):
-    def __init__(self, p_norm = 2.):
+    def __init__(self, p_norm = 2., beta:float=1.):
         super().__init__()
+        self.beta = beta
         self.p_norm = float(p_norm)
+
     def update_vi(self):
         pass
             

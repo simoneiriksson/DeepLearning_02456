@@ -230,8 +230,18 @@ def Accuracy(confusion_matrix):
     class_accuracy = class_accuracy.mean()
     return class_accuracy
    
-    
 
-
+def extract_a_few_images(folder, vae, no_images, dataset, device):
+    ######### extract a few images already #########
+    n = no_images
+    for i in range(n):
+        x, y = dataset[i]
+        plot_image_channels(x, file=folder + "/x_{}.png".format(i))
+        x = x.to(device)
+        outputs = vae(x[None,:,:,:])
+        x_hat = outputs["x_hat"]
+        x_reconstruction = x_hat
+        x_reconstruction = x_reconstruction[0].detach()
+        plot_image_channels(x_reconstruction.cpu(), file=folder + "/x_reconstruction_{}.png".format(i))
 
 

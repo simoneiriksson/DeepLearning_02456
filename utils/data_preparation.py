@@ -4,6 +4,7 @@ import numpy as np
 import os
 from utils.utils import cprint
 import torch
+import math 
 
 def read_metadata(path: str) -> pd.DataFrame:
     result = pd.read_csv(path)
@@ -68,6 +69,7 @@ def get_relative_image_folders(metadata: pd.DataFrame) -> List[str]:
 
 def load_images(paths: List[str], verbose: bool = False, log_every: int = 10_000, logfile=None):
     image_0 = load_image(paths[0])
+    print("verbose: ", verbose)
     
     dims = [len(paths)] + list(image_0.shape)
     result = torch.zeros(dims)
@@ -145,3 +147,47 @@ def get_MOA_to_id() -> Dict[str, int]:
             'Microtubule stabilizers': 10,
             'Protein degradation': 11,
             'Protein synthesis': 12}
+            
+########## loading data #########
+
+def read_metadata_and_images(use_server_path = True, \
+                            load_images_from_individual_files = True, 
+                            load_subset_of_images = None, 
+                            save_images_to_singlefile = False,
+                            logfile = None):
+    if load_images_from_individual_files==False & load_subset_of_images!=None:
+        cprint("You cannot use a subset of data, when loading from images.pt", logfile)
+    if use_server_path == 1:
+        path = get_server_directory_path()
+    else: path = "../data/all/"
+
+    #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
+    metadata = read_metadata(path + "metadata.csv") 
+    if load_subset_of_images == None:
+        metadata = shuffle_metadata(metadata)
+        cprint("Using all metadata", logfile)
+    else:
+        metadata = shuffle_metadata(metadata)[:load_subset_of_images]
+        cprint("Using a subset of the metadata", logfile)
+    cprint("loaded metadata",logfile)
+
+    cprint("loading images", logfile)
+    if load_images_from_individual_files == True:
+        cprint("loading images from individual files", logfile)
+        relative_paths = get_relative_image_paths(metadata)
+        image_paths = [path + relative for relative in relative_paths] #absolute path
+        log_every = max(math.floor(len(image_paths)/100),10)
+        cprint("loading images now", logfile)
+        images = load_images(image_paths, verbose=True, log_every=log_every, logfile=logfile)
+    else:
+        cprint("Loading images from images.pt file", logfile)
+        images = torch.load("../data/images.pt")
+    if save_images_to_singlefile == True:
+        create_directory('../data/')
+        torch.save(images, "../data/images.pt")
+    
+    mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
+    cprint("loaded images", logfile)
+
+    cprint("normalized images", logfile)
+    return images, metadata, mapping

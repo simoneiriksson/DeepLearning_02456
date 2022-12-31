@@ -83,24 +83,14 @@ params = {
     'latent_features' : 256,
     'model_type' : "SparseVAE",
     'alpha': 0.05, 
-    'alpha_max': 0.05,
     'beta': 0.5, 
-    'beta_max': 1,
-    'p_norm': 2.
+    'p_norm': 2.0
     }
-
-params['alpha_increase'] = (params['alpha_max'] - params['alpha'])/params['num_epochs']
-params['beta_increase'] = (params['beta_max'] - params['beta'])/params['num_epochs']
-print(params.keys())
-if 'p_norm' in params.items(): print("hurra")         
 
 vae, validation_data, training_data, params, vi = initVAEmodel(params)
 cprint("params: {}".format(params), logfile)
 vae = vae.to(device)
 optimizer = torch.optim.Adam(vae.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
-
-cprint("alpha_increase:{} ".format(params['alpha_increase']), logfile)
-cprint("beta_increase:{} ".format(params['beta_increase']), logfile)
 
 train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=0, drop_last=True)
 validation_loader = DataLoader(validation_set, batch_size=max(2, params['batch_size']), shuffle=False, num_workers=0, drop_last=False)
@@ -125,7 +115,7 @@ for epoch in range(num_epochs):
         loss, diagnostics, outputs = vi(vae, x)
         optimizer.zero_grad()
         loss.backward()
-        meh = nn.utils.clip_grad_norm_(vae.parameters(), 10_000)
+        _ = nn.utils.clip_grad_norm_(vae.parameters(), 10_000)
         optimizer.step()
         for k, v in diagnostics.items():
             training_epoch_data[k] += list(v.cpu().data.numpy())
