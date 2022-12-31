@@ -70,9 +70,9 @@ test_set = SingleCellDataset(metadata_test, images, mapping)
 #### LOAD TRAINED MODEL ####
 # choose correct output folder for LoadVAEmodel() below!!!
 model_type  = "nonvar"
-#vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-28 - 09-40-32/", model_type)
-#vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel("./dump/outputs_2022-12-29 - 19-45-02/", model_type)
-model, validation_data, training_data, params, vi = LoadVAEmodel("./dump/outputs_2022-12-30 - 17-07-33/")
+#output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
+output_folder = "./dump/outputs_2022-12-29 - 19-45-02/"
+vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel(output_folder, model_type)
 
 cprint("model is of type {}".format(params['model_type']), logfile)
 cprint("model parameters are: {}".format(params), logfile)
@@ -104,14 +104,19 @@ for i in range(10,n+10):
     plot_image_channels(img_saturate(x_reconstruction.cpu()), file=downstream_folder + "x_reconstruction_{}.png".format(i))
     
 
-#### PLOT INTERPOLATION OF RECONSTRUCTONS? (Cosine Similarity?)####
+#### CALCULATE LATENT SPACE FOR ALL IMAGES ####
+batch_size= 10000
+metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
+
+
+#### PLOT INTERPOLATION OF RECONSTRUCTONS ####
 #treatments list
 tl = metadata['Treatment'].sort_values().unique()
 #choosing the (target) treatment to plot
 target = tl[0]  #'ALLN_100.0'
-model = "../dump/outputs_2022-12-28 - 09-40-32/"
+model = output_folder
 model_type = "nonvar"
-filefolder = "../" + downstream_folder + "latent_interpolation.png"
+filefolder = "./" + downstream_folder + "latent_interpolation.png"
 plot_cosine_similarity(target, metadata_latent, 
                         model, 
                         model_type,
@@ -120,8 +125,6 @@ plot_cosine_similarity(target, metadata_latent,
 
 #### PLOT LATENT SPACE HEATMAP ####
 # heatmap of (abs) correlations between latent variables and MOA classes
-batch_size= 10000
-metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
 heatmap = heatmap(metadata_latent)
 # plot heatmap
 plt.figure(figsize = (8,4))
