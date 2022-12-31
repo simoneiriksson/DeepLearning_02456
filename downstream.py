@@ -22,11 +22,9 @@ from utils.profiling import *
 from utils.utils import *
 
 from models.ReparameterizedDiagonalGaussian import *
-from models.CytoVariationalAutoencoder import CytoVariationalAutoencoder
-from models.VariationalAutoencoder import VariationalAutoencoder
-from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
-from models.VariationalInference import VariationalInference
-from models.VariationalInference_nonvar import VariationalInference_nonvar
+from graveyard.CytoVariationalAutoencoder import CytoVariationalAutoencoder
+from graveyard.VariationalInference import VariationalInference
+from models.VariationalInference_VAE import VariationalInference_nonvar
 from models.LoadModels import *
 
 

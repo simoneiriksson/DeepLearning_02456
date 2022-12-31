@@ -13,20 +13,13 @@ from torch.distributions import Distribution, Normal
 from torch.utils.data import DataLoader
 from torch.utils.data import DataLoader, Dataset
 
-from models.LoadModels import LoadVAEmodel, initVAEmodel, initVAEmodel_old, LoadVAEmodel_old
-from models.ReparameterizedDiagonalGaussian import ReparameterizedDiagonalGaussian
-from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar
-from models.VariationalAutoencoder import VariationalAutoencoder
-from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
-from models.ConvVariationalAutoencoder import ConvVariationalAutoencoder
-from models.VariationalInference_nonvar import VariationalInference_nonvar
-from models.VariationalInferenceSparseVAE import VariationalInferenceSparseVAE
+from models.LoadModels import LoadVAEmodel, initVAEmodel
 from utils.data_transformers import normalize_every_image_channels_seperately_inplace
 from utils.data_transformers import normalize_channels_inplace, batch_normalize_images
 from utils.data_transformers import SingleCellDataset
 from utils.plotting import plot_VAE_performance, plot_image_channels
-from utils.training import create_directory, read_metadata, get_relative_image_paths, load_images
-from utils.training import get_MOA_mappings, shuffle_metadata, split_metadata
+from utils.data_preparation import create_directory, read_metadata, get_relative_image_paths, load_images
+from utils.data_preparation import get_MOA_mappings, shuffle_metadata, split_metadata
 from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
 from utils.data_preparation import get_server_directory_path
 import importlib
@@ -88,7 +81,7 @@ params = {
     'weight_decay' : 1e-3,
     'image_shape' : np.array([3, 68, 68]),
     'latent_features' : 256,
-    'model_type' : "Cyto_nonvar",
+    'model_type' : "SparseVAE",
     'alpha': 0.05, 
     'alpha_max': 0.05,
     'beta': 0.5, 

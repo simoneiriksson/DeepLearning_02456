@@ -80,8 +80,7 @@ def view_as_image_plot_format(image: torch.Tensor) -> torch.Tensor:
     '''
     return image.permute(1,2,0)
     
-class SingleCellDataset(Dataset):
-    
+class SingleCellDataset(Dataset):    
     def __init__(self, metadata: pd.DataFrame, images: torch.Tensor, label_to_id: Dict[str, int]):
         self.metadata = metadata
         self.label_to_id = label_to_id

@@ -5,8 +5,8 @@ from typing import List, Set, Dict, Tuple, Optional, Any
 import math
 
 
-class VariationalInferenceSparseVAE(nn.Module):
-    def __init__(self, beta:float=1., alpha:float=0.0):
+class VariationalInference_SparseVAE(nn.Module):
+    def __init__(self, beta:float=1., alpha:float=0.1):
         super().__init__()
         self.beta = beta
         self.alpha = alpha        

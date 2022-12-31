@@ -19,9 +19,6 @@ class VariationalInference(nn.Module):
 
         px, pz, qz, z = [outputs[k] for k in ["px", "pz", "qz", "z"]]
         
-        #log_px = reduce(px.log_prob(x))
-        #print("((px.mu - x)**2).shape: ", ((px.mean - x)**2).shape)
-        
         sigma_sqr = ((px.mean - x)**2).mean(axis=[1,2,3])
         log_px_all = -((px.mean - x)**2)/(2*px.stddev**2) - px.stddev.log() - math.log(math.pi*2)*0.5
         #log_px = -((px.mean - x)**2).sum(axis=[1,2,3])/(2*sigma_sqr) - sigma_sqr.sqrt().log() - math.log(math.pi*2)*0.5
@@ -32,12 +29,12 @@ class VariationalInference(nn.Module):
         #log_px = -torch.nn.functional.binary_cross_entropy(px.mean, x, size_average = False)
         #print("log_px.shape: ", log_px.shape)
         
-        #log_pz = reduce(pz.log_prob(z))
-        #log_qz = reduce(qz.log_prob(z))
+        log_pz = reduce(pz.log_prob(z))
+        log_qz = reduce(qz.log_prob(z))
         
-        #kl = log_qz - log_pz
+        kl = log_qz - log_pz
         # Reference Kingma & Welling p. 5 bottom
-        kl = - (.5 * (1 + (qz.sigma ** 2).log() - qz.mu ** 2 - qz.sigma**2)).sum(axis=[1])
+        # kl = - (.5 * (1 + (qz.sigma ** 2).log() - qz.mu ** 2 - qz.sigma**2)).sum(axis=[1])
         #elbo = log_px - kl
         beta_elbo = log_px - self.beta * kl
         

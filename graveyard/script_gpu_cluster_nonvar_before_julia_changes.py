@@ -22,11 +22,10 @@ from utils.training import *
 
 from models.ReparameterizedDiagonalGaussian import *
 from models.CytoVariationalAutoencoder_nonvar import *
-from models.VariationalAutoencoder import *
 from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
-from models.ConvVariationalAutoencoder import *
-from models.VariationalInference_nonvar import *
-from models.VariationalInferenceSparseVAE import VariationalInferenceSparseVAE
+from graveyard.ConvVariationalAutoencoder import *
+from models.VariationalInference_VAE import *
+from models.VariationalInference_SparseVAE import VariationalInferenceSparseVAE
 from utils.utils import *
 from models.LoadModels import *
 

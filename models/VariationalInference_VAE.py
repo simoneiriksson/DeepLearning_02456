@@ -10,7 +10,7 @@ def reduce(x:Tensor) -> Tensor:
     flat = view_flat_samples(x)
     return flat.sum(dim=1)
 
-class VariationalInference_nonvar(nn.Module):
+class VariationalInference_VAE(nn.Module):
     def __init__(self, beta:float=1., p_norm = 2.):
         super().__init__()
         self.beta = beta

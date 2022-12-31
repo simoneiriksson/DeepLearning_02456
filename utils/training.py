@@ -28,34 +28,3 @@ def extract_MOA_ids_from_indices(indices: np.ndarray, metadata: pd.DataFrame) ->
     moa_to_id = get_MOA_to_id()
     rows = metadata["moa"].loc[indices]
     return torch.tensor([moa_to_id[row] for row in rows])
-    
-class TreatmentBalancedBatchGenerator:
-    
-    def __init__(self, images: torch.Tensor, metadata: pd.DataFrame):
-        self.treatment_indices = get_treatment_indices(metadata)
-        self.images = images
-        self.metadata = metadata
-        
-        self.treatment_index_at = defaultdict(int)
-        
-        for treatment in self.treatment_indices:
-            assert(len(self.treatment_indices[treatment]) > 0)
-            
-            self.treatment_index_at[treatment] = 0
-    
-    def next_indices(self) -> np.ndarray:
-        result = np.empty(len(self.treatment_indices), dtype=np.int64)
-        
-        for i, treatment in enumerate(self.treatment_indices):
-            indices = self.treatment_indices[treatment]
-            index = self.treatment_index_at[treatment]
-            self.treatment_index_at[treatment] = (index + 1) % len(indices)
-            result[i:i+1] = indices[index]
-        
-        return result
-    
-    def next_batch(self) -> Tuple[torch.Tensor, torch.Tensor]:
-        indices = self.next_indices()
-        X, y = extract_batch_from_indices(indices, self.images, self.metadata)
-        return X, y
-

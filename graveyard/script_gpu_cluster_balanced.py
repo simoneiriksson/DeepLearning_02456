@@ -18,10 +18,8 @@ from utils.data_transformers import *
 from utils.plotting import *
 
 from models.ReparameterizedDiagonalGaussian import *
-from models.CytoVariationalAutoencoder import *
-from models.VariationalAutoencoder import *
-from models.ConvVariationalAutoencoder import *
-from models.VariationalInference import *
+from graveyard.CytoVariationalAutoencoder import *
+from graveyard.VariationalInference import *
 from utils.utils import *
 from models.LoadModels import *
 from utils.training import *

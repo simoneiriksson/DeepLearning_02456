@@ -11,7 +11,6 @@ class VariationalInference_VAEGAN(nn.Module):
     def __init__(self, p_norm = 2.):
         super().__init__()
         self.p_norm = float(p_norm)
-        self.DiscLoss_fn = torch.nn.CrossEntropyLoss()
     def update_vi(self):
         pass
             
