@@ -1,4 +1,4 @@
-%matplotlib inline
+#%matplotlib inline
 import matplotlib.pyplot as plt
 
 from typing import List, Set, Dict, Tuple, Optional, Any
@@ -70,9 +70,8 @@ test_set = SingleCellDataset(metadata_test, images, mapping)
 #### LOAD TRAINED MODEL ####
 # choose correct output folder for LoadVAEmodel() below!!!
 model_type  = "nonvar"
-#output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
-output_folder = "./dump/outputs_2022-12-29 - 19-45-02/"
-vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel(output_folder, model_type)
+output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
+model, validation_data, training_data, params, vi = LoadVAEmodel(output_folder, model_type)
 
 cprint("model is of type {}".format(params['model_type']), logfile)
 cprint("model parameters are: {}".format(params), logfile)
@@ -114,11 +113,10 @@ metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
 tl = metadata['Treatment'].sort_values().unique()
 #choosing the (target) treatment to plot
 target = tl[0]  #'ALLN_100.0'
-model = output_folder
 model_type = "nonvar"
 filefolder = "./" + downstream_folder + "latent_interpolation.png"
 plot_cosine_similarity(target, metadata_latent, 
-                        model, 
+                        output_folder, 
                         model_type,
                         filefolder)
 
