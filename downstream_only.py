@@ -66,70 +66,23 @@ metadata_train, metadata_validation = split_metadata(metadata, split_fraction = 
 train_set = SingleCellDataset(metadata_train, images, mapping)
 validation_set = SingleCellDataset(metadata_validation, images, mapping)
 
-######### VAE Configs #########
-cprint("VAE Configs", logfile)
+#### LOAD TRAINED MODEL ####
+# choose correct output folder for LoadVAEmodel() below!!!
+output_folder = "./dump/outputs_2023-01-01 - 11-05-09/"
+model, validation_data, training_data, params, vi = LoadVAEmodel(output_folder)
 
-# start another training session
-params = {
-    'num_epochs' : 10,
-    'batch_size' : min(64, len(train_set)),
-    'learning_rate' : 1e-3,
-    'weight_decay' : 1e-3,
-    'image_shape' : np.array([3, 68, 68]),
-    'latent_features' : 256,
-    'model_type' : "SparseVAE",
-    'alpha': 0.05, 
-    'beta': 0.5, 
-    'p_norm': 2.0
-    }
+cprint("model is of type {}".format(params['model_type']), logfile)
+cprint("model parameters are: {}".format(params), logfile)
 
-models, validation_data, training_data, params, vi = initVAEmodel(params)
-cprint("params: {}".format(params), logfile)
+vae = model[0]
+
+if params['model_type'] in ['SparseVAEGAN', 'CytoVAEGAN']:
+    gan = model[1]
 
 train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=0, drop_last=True)
 validation_loader = DataLoader(validation_set, batch_size=max(2, params['batch_size']), shuffle=False, num_workers=0, drop_last=False)
-vae = models[0]
-
-if params['model_type'] in ['SparseVAEGAN', 'CytoVAEGAN']:
-    Trainer = VAEGAN_trainer
-    gan = models[1]
-
-if params['model_type'] in  ['Cyto_nonvar', 'CytoVAE', 'SparseVAE']:
-    Trainer = VAE_trainer
-
-Trainer(models=models, \
-    validation_data=validation_data, \
-    training_data=training_data, \
-    params=params, 
-    vi=vi, 
-    train_loader=train_loader, 
-    device=device, 
-    validation_loader=validation_loader, 
-    print_every=1, 
-    logfile=logfile)
-
-cprint("finished training", logfile)
-print(training_data)
 
 _ = vae.eval() # because of batch normalization
-#plot_VAE_performance(training_data, file=None, title='VAE - learning')
-cprint("Plotting VAE performance", logfile)
-create_directory(output_folder + "images")
-plot_VAE_performance(training_data, file=output_folder + "images/training_data.png", title='VAE - learning')
-plot_VAE_performance(validation_data, file=output_folder + "images/validation_data.png", title='VAE - validation')
-
-
-######### Save VAE parameters #########
-cprint("Save VAE parameters", logfile)
-save_model(models, validation_data, training_data, params, output_folder)
-
-
-
-########################################################
-#                                                      #
-#                 DOWNSTREAM TASKS                     #
-#                                                      #
-########################################################
 
 downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile)
     

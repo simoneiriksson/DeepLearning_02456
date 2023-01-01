@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-
 # extracting latent variables for each image/cell
 def LatentVariableExtraction(metadata, images, batch_size, vae):
     metadata['Well_unique'] = metadata['Image_Metadata_Well_DAPI'] + '_' + metadata['Image_Metadata_Plate_DAPI']
