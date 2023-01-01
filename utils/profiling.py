@@ -1,5 +1,7 @@
 import pandas as pd
 import numpy as np
+from utils.utils import cprint
+
 # extracting latent variables for each image/cell
 def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=None):
     metadata['Well_unique'] = metadata['Image_Metadata_Well_DAPI'] + '_' + metadata['Image_Metadata_Plate_DAPI']
@@ -23,7 +25,8 @@ def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=
         z_df.index = list(range(start,end))
         df = pd.concat([metadata.iloc[start:end], z_df], axis=1)
         new_metadata = pd.concat([new_metadata, df], axis=0)
-        print("Profiling {}/{} batches of size {}".format(j, len(batch_offset)-1, batch_size))
+        #cprint("Profiling {}/{} batches of size {}".format(j, len(batch_offset)-1, batch_size), logfile)
+        cprint(f"Profiling {j}/{len(batch_offset)-1} batches of size {batch_size}", logfile)
     
     # last batch
     start = batch_offset[-1]
@@ -39,7 +42,7 @@ def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=
         z_df.index = list(range(start,end))
         df = pd.concat([metadata.iloc[start:end], z_df], axis=1)
         new_metadata = pd.concat([new_metadata, df], axis=0)
-        print("Profiling {}/{} batches of size {}".format(len(batch_offset)-1, len(batch_offset)-1, end-start))
+        cprint("Profiling {}/{} batches of size {}".format(len(batch_offset)-1, len(batch_offset)-1, end-start), logfile)
 
     return new_metadata
 

@@ -293,13 +293,13 @@ def Accuracy(confusion_matrix):
 def precision(confusion_matrix):
     truepos = np.diag(confusion_matrix)
     precision = truepos / np.sum(confusion_matrix, axis=0)
-    return precision.mean()
+    return precision.mean() * 100
 
 
 def recall(confusion_matrix):
     truepos = np.diag(confusion_matrix)
     recall = truepos / np.sum(confusion_matrix, axis=1)
-    return recall.mean()
+    return recall.mean() * 100
 
 
 def extract_a_few_images(folder, vae, no_images, dataset, device, logfile=None):

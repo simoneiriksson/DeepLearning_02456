@@ -24,6 +24,7 @@ from utils.plotting import plot_control_cell_to_target_cell
         
 def downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile=None):
     cprint("Starting downstream tasks", logfile)
+    device = 'cpu'
     vae = vae.to(device)
 
     _ = vae.eval() # because of batch normalization
@@ -34,20 +35,20 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
 
     #### CALCULATE LATENT REPRESENTATION FOR ALL IMAGES ####
     cprint("Calculate latent representation for all images", logfile)
-    batch_size= 10000
-    metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae, device)
-    cprint("Done calculating latent sapce", logfile)
+    batch_size= 1024
+    metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile)
+    cprint("Done calculating latent space", logfile)
 
     
     cprint("Plotting interpolations of reconstructions", logfile)
     create_directory(output_folder + "interpolations")
     #treatments list
     tl = metadata['Treatment'].sort_values().unique()
-    for treatment in [tl[0]]:
-    #for treatment in tl:
+    #for treatment in [tl[0]]:
+    for treatment in tl:
         filename = output_folder + "interpolations/" + treatment.replace('/', "_") + ".png"
-        print("doing: ", filename)
-        plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, device, file=filename,  control='DMSO_0.0', control_text = None,  target_text=None)
+        cprint(f"doing: {filename}", logfile)
+        plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, device, file=filename,  control='DMSO_0.0', control_text = 'DMSO_0.0',  target_text=treatment)
 
     #### PLOT LATENT SPACE HEATMAP ####
     cprint("Plotting latent space heatmap", logfile)
@@ -77,9 +78,11 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
 
 
     #### PRINT ACCURACY ####
-    cprint("Model Accuracy: {}".format(Accuracy(confusion_matrix)), logfile)
-    cprint("Model Precision: {}".format(precision(confusion_matrix)), logfile) 
-    cprint("Model Recall: {}".format(recall(confusion_matrix)), logfile)
-    cprint("Model F1: {}".format(2 * (precision(confusion_matrix) * recall(confusion_matrix))), logfile)
-
-
+    prec = precision(confusion_matrix)
+    acc = Accuracy(confusion_matrix)
+    rec = recall(confusion_matrix)
+    cprint("Model Accuracy: {}".format(acc), logfile)
+    cprint("Model Precision: {}".format(prec), logfile) 
+    cprint("Model Recall: {}".format(rec), logfile)
+    #cprint("Model F1: {}".format(2 * (precision(confusion_matrix) * recall(confusion_matrix))), logfile)
+    cprint("Model F1: {}".format(2 * (prec * rec) / (prec+ rec)), logfile)
