@@ -23,7 +23,7 @@ def LoadVAEmodel(folder, model_type=None, device="cpu"):
 
     if model_type in ['Cyto_nonvar', 'CytoVAE']:
         vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
-        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
+        vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         vi = VariationalInference_VAE(beta=params['beta'], p_norm = p_norm)
         model = [vae]
 
@@ -45,7 +45,7 @@ def LoadVAEmodel(folder, model_type=None, device="cpu"):
 
     if model_type == 'SparseVAE':
         vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
-        model.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
+        vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         vi = VariationalInference_SparseVAE(beta=params['beta'], alpha=params['alpha'], p_norm = p_norm)
         model = [vae]
     return model, validation_data, training_data, params, vi
