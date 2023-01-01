@@ -3,7 +3,7 @@ from collections import defaultdict
 import torch
 import numpy as np
 
-from models.CytoVariationalAutoencoder_nonvar import CytoVariationalAutoencoder_nonvar
+from models.CytoVariationalAutoencoder import CytoVariationalAutoencoder
 from models.DISC import DISC
 from models.SparseVariationalAutoencoder import SparseVariationalAutoencoder
 from models.VariationalInference_VAE import VariationalInference_VAE
@@ -22,13 +22,13 @@ def LoadVAEmodel(folder, model_type=None, device="cpu"):
     else: p_norm = 2
 
     if model_type in ['Cyto_nonvar', 'CytoVAE']:
-        vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         vi = VariationalInference_VAE(beta=params['beta'], p_norm = p_norm)
         model = [vae]
 
     if model_type in ['Cyto_VAEGAN', 'CytoVAEGAN']:
-        vae = CytoVariationalAutoencoder_nonvar(params['image_shape'], params['latent_features'])
+        vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         disc = DISC(params['image_shape'], params['latent_features'])
         vae.load_state_dict(torch.load(folder + "vae_parameters.pt", map_location=torch.device(device)))
         disc.load_state_dict(torch.load(folder + "disc_parameters.pt", map_location=torch.device(device)))

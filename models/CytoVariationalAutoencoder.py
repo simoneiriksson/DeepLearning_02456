@@ -4,13 +4,13 @@ import torch
 #from models.PrintSize import PrintSize
 from typing import List, Set, Dict, Tuple, Optional, Any
 
-class CytoVariationalAutoencoder_nonvar(nn.Module):
+class CytoVariationalAutoencoder(nn.Module):
  
     def update_(self):
         pass
   
     def __init__(self, input_shape, latent_features: int):
-        super(CytoVariationalAutoencoder_nonvar, self).__init__()
+        super(CytoVariationalAutoencoder, self).__init__()
         
         self.input_shape = input_shape
         self.latent_features = latent_features

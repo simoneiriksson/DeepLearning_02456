@@ -24,6 +24,7 @@ from utils.data_preparation import get_MOA_mappings, shuffle_metadata, split_met
 from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
 from utils.utils import save_model
 from utils.profiling import LatentVariableExtraction
+from utils.plotting import heatmap
 
 from utils.plotting import plot_cosine_similarity
 
@@ -65,54 +66,20 @@ metadata_train, metadata_validation = split_metadata(metadata, split_fraction = 
 train_set = SingleCellDataset(metadata_train, images, mapping)
 validation_set = SingleCellDataset(metadata_validation, images, mapping)
 
-######### VAE Configs #########
-cprint("VAE Configs", logfile)
 
-# start another training session
-params = {
-    'num_epochs' : 10,
-    'batch_size' : min(64, len(train_set)),
-    'learning_rate' : 1e-3,
-    'weight_decay' : 1e-3,
-    'image_shape' : np.array([3, 68, 68]),
-    'latent_features' : 256,
-    'model_type' : "SparseVAE",
-    'alpha': 0.05, 
-    'beta': 0.5, 
-    'p_norm': 2.0
-    }
+#### LOAD TRAINED MODEL ####
+# choose correct output folder for LoadVAEmodel() below!!!
+model_type  = "nonvar"
+output_folder = "./dump/outputs_2023-01-01 - 11-05-09/"
+model, validation_data, training_data, params, vi = LoadVAEmodel(output_folder, model_type)
 
-models, validation_data, training_data, params, vi = initVAEmodel(params)
-cprint("params: {}".format(params), logfile)
-
-train_loader = DataLoader(train_set, batch_size=params['batch_size'], shuffle=True, num_workers=0, drop_last=True)
-validation_loader = DataLoader(validation_set, batch_size=max(2, params['batch_size']), shuffle=False, num_workers=0, drop_last=False)
-vae = models[0]
+vae = model[0]
 
 if params['model_type'] in ['SparseVAEGAN', 'CytoVAEGAN']:
-    Trainer = VAEGAN_trainer
-    gan = models[1]
+    gan = model[1]
 
-if params['model_type'] in  ['Cyto_nonvar', 'CytoVAE', 'SparseVAE']:
-    Trainer = VAE_trainer
-
-Trainer(models=models, \
-    validation_data=validation_data, \
-    training_data=training_data, \
-    params=params, 
-    vi=vi, 
-    train_loader=train_loader, 
-    device=device, 
-    validation_loader=validation_loader, 
-    print_every=1, 
-    logfile=logfile)
-
-cprint("finished training", logfile)
-print(training_data)
-
-######### Save VAE parameters #########
-cprint("Save VAE parameters", logfile)
-save_model(models, validation_data, training_data, params, output_folder)
+cprint("model is of type {}".format(params['model_type']), logfile)
+cprint("model parameters are: {}".format(params), logfile)
 
 
 ########################################################
@@ -141,19 +108,21 @@ create_directory(output_folder + "interpolations")
 #treatments list
 tl = metadata['Treatment'].sort_values().unique()
 #choosing the (target) treatment to plot
-for target in tl[0]:
+for target in [tl[0]]:
+#for target in tl:
+#target = tl[0]  #'ALLN_100.0'
     plot_cosine_similarity(target, metadata_latent, vae, output_folder + "interpolations/" + target + ".png")
 
 
-# #### PLOT LATENT SPACE HEATMAP ####
-# # heatmap of (abs) correlations between latent variables and MOA classes
-# heatmap = heatmap(metadata_latent)
-# # plot heatmap
-# plt.figure(figsize = (8,4))
-# heat = sns.heatmap(heatmap)
-# figure = heat.get_figure()
-# plt.gcf()
-# figure.savefig(downstream_folder + "latent_var_heatmap.png", bbox_inches = 'tight')
+#### PLOT LATENT SPACE HEATMAP ####
+# heatmap of (abs) correlations between latent variables and MOA classes
+heatmap = heatmap(metadata_latent)
+# plot heatmap
+plt.figure(figsize = (8,4))
+heat = sns.heatmap(heatmap)
+figure = heat.get_figure()
+plt.gcf()
+figure.savefig(output_folder + "images/latent_var_heatmap.png", bbox_inches = 'tight')
 
 
 # #### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####

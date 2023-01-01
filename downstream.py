@@ -22,9 +22,9 @@ from utils.profiling import *
 from utils.utils import *
 
 from models.ReparameterizedDiagonalGaussian import *
-from graveyard.CytoVariationalAutoencoder import CytoVariationalAutoencoder
-from graveyard.VariationalInference import VariationalInference
-from models.VariationalInference_VAE import VariationalInference_nonvar
+#from graveyard.CytoVariationalAutoencoder import CytoVariationalAutoencoder
+#from graveyard.VariationalInference import VariationalInference
+#from models.VariationalInference_VAE import VariationalInference_nonvar
 from models.LoadModels import *
 
 
@@ -40,18 +40,18 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
 #### LOAD DATA ####
-data_root = get_server_directory_path()   #use this for GPU/HPC
-#data_root  = "../data/mix_from_all/"     #use this for local PC / ThinLinc
+#data_root = get_server_directory_path()   #use this for GPU/HPC
+data_root  = "../data/mix_from_all/"     #use this for local PC / ThinLinc
 metadata_all = read_metadata(data_root + "metadata.csv")
 metadata = shuffle_metadata(metadata_all)#[:100000]
 
 ####### use the 3 lines below for local PC / ThinLinc ########
-#relative_path = get_relative_image_paths(metadata)
-#image_paths = [data_root  + path for path in relative_path]
-#images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
+relative_path = get_relative_image_paths(metadata)
+image_paths = [data_root  + path for path in relative_path]
+images = load_images(image_paths, verbose=True, log_every=10000, logfile=logfile)
 
 ####### use line below for GPU/HPC ########
-images = torch.load("../data/images.pt")        #use this for GPU/HPC
+#images = torch.load("../data/images.pt")        #use this for GPU/HPC
 
 mapping = get_MOA_mappings(metadata)
 
@@ -68,17 +68,16 @@ test_set = SingleCellDataset(metadata_test, images, mapping)
 #### LOAD TRAINED MODEL ####
 # choose correct output folder for LoadVAEmodel() below!!!
 model_type  = "nonvar"
-output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
+output_folder = "./dump/outputs_2023-01-01 - 11-05-09/"
 model, validation_data, training_data, params, vi = LoadVAEmodel(output_folder, model_type)
 
 cprint("model is of type {}".format(params['model_type']), logfile)
 cprint("model parameters are: {}".format(params), logfile)
 
-if type(model)==list:
-    vae=model[0]
-    gan=model[1]
-    print("meh")
-else: vae=model
+vae = model[0]
+
+if params['model_type'] in ['SparseVAEGAN', 'CytoVAEGAN']:
+    gan = model[1]
 
 #### PLOT MODEL PERFORMANCE####
 plot_VAE_performance(training_data, file=downstream_folder + "training_data.png", title='VAE - learning')
@@ -111,12 +110,8 @@ metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
 tl = metadata['Treatment'].sort_values().unique()
 #choosing the (target) treatment to plot
 target = tl[0]  #'ALLN_100.0'
-model_type = "nonvar"
 filefolder = "./" + downstream_folder + "latent_interpolation.png"
-plot_cosine_similarity(target, metadata_latent, 
-                        output_folder, 
-                        model_type,
-                        filefolder)
+plot_cosine_similarity(target, metadata_latent, vae, filefolder)
 
 
 #### PLOT LATENT SPACE HEATMAP ####

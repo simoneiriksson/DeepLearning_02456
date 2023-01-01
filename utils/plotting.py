@@ -133,12 +133,11 @@ def plot_cosine_similarity_old(x0, x1, model, file=None, title=None):
     
     plt.close()
 
-    
-def plot_cosine_similarity(Target, metadata_latent, model, model_type, file=None, title=None):
+
+def plot_cosine_similarity(target, metadata_latent, vae, file=None, title=None):
     #model could be eg. "model_dump/outputs_2022-12-04 - 12-20-15/"
     #x0.shape and x1.shape should be torch.Size([3, 68, 68])
     
-    vae, validation_data, training_data, VAE_settings, vi = LoadVAEmodel(model, model_type)
     '''vae = model
     outputs0 = vae(x0[None,:,:,:])
     outputs1 = vae(x1[None,:,:,:])
@@ -150,7 +149,7 @@ def plot_cosine_similarity(Target, metadata_latent, model, model_type, file=None
     tcc = treatment_center_cells(metadata_latent,tp,p=2)
     
     z0 = tcc[tcc['Treatment'] == 'DMSO_0.0'].iloc[:,-256:].values
-    z1 = tcc[tcc['Treatment'] == Target].iloc[:,-256:].values
+    z1 = tcc[tcc['Treatment'] == target].iloc[:,-256:].values
 
     zs = np.linspace(z0, z1, num=10)
 
