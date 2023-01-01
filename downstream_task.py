@@ -18,7 +18,7 @@ from utils.data_preparation import create_directory, read_metadata, get_relative
 from utils.utils import cprint
 from utils.profiling import LatentVariableExtraction
 from utils.plotting import heatmap
-from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
+from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy, precision, recall
 from utils.profiling import treatment_profiles, treatment_center_cells
 from utils.plotting import plot_control_cell_to_target_cell
         
@@ -43,8 +43,8 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     create_directory(output_folder + "interpolations")
     #treatments list
     tl = metadata['Treatment'].sort_values().unique()
-    #for treatment in [tl[0]]:
-    for treatment in tl:
+    for treatment in [tl[0]]:
+    #for treatment in tl:
         filename = output_folder + "interpolations/" + treatment.replace('/', "_") + ".png"
         print("doing: ", filename)
         plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, device, file=filename,  control='DMSO_0.0', control_text = None,  target_text=None)
@@ -80,6 +80,6 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     cprint("Model Accuracy: {}".format(Accuracy(confusion_matrix)), logfile)
     cprint("Model Precision: {}".format(precision(confusion_matrix)), logfile) 
     cprint("Model Recall: {}".format(recall(confusion_matrix)), logfile)
-    cprint("Model F1: {}".format(2 * (precision(confusion_matrix) * recall(confusion_matrix)) / 
-                                 (precision(confusion_matrix) + recall(confusion_matrix)), logfile)
+    cprint("Model F1: {}".format(2 * (precision(confusion_matrix) * recall(confusion_matrix))), logfile)
+
 
