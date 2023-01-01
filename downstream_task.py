@@ -17,9 +17,11 @@ from utils.plotting import plot_VAE_performance, plot_image_channels, extract_a_
 from utils.data_preparation import create_directory, read_metadata, get_relative_image_paths, load_images
 from utils.utils import cprint
 from utils.profiling import LatentVariableExtraction
-from utils.plotting import heatmap, plot_cosine_similarity
+from utils.plotting import heatmap
 from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
-
+from utils.profiling import treatment_profiles, treatment_center_cells
+from utils.plotting import plot_control_cell_to_target_cell
+        
 def downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile=None):
     cprint("Starting downstream tasks", logfile)
 
@@ -35,16 +37,16 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
     cprint("Done calculating latent sapce", logfile)
 
-    #### PLOT INTERPOLATION OF RECONSTRUCTONS ####
+    
     cprint("Plotting interpolations of reconstructions", logfile)
     create_directory(output_folder + "interpolations")
     #treatments list
     tl = metadata['Treatment'].sort_values().unique()
-    #choosing the (target) treatment to plot
-    #for target in [tl[0]]:
-    for target in tl:
-    #target = tl[0]  #'ALLN_100.0'
-        plot_cosine_similarity(target, metadata_latent, vae, output_folder + "interpolations/" + target + ".png")
+    for treatment in [tl[0]]:
+#    for treatment in tl:
+        filename = output_folder + "interpolations/" + treatment.replace('/', "_") + ".png"
+        print("doing: ", filename)
+        plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, file=filename,  control='DMSO_0.0', control_text = None,  target_text=None)
 
     #### PLOT LATENT SPACE HEATMAP ####
     cprint("Plotting latent space heatmap", logfile)

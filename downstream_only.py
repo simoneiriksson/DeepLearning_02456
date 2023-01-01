@@ -24,7 +24,7 @@ from utils.data_preparation import get_MOA_mappings, shuffle_metadata, split_met
 from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
 from utils.utils import save_model
 from utils.profiling import LatentVariableExtraction
-from utils.plotting import heatmap, plot_cosine_similarity
+#from utils.plotting import heatmap, plot_cosine_similarity
 from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
 from downstream_task import downstream_task
 

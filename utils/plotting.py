@@ -10,6 +10,8 @@ from utils.data_transformers import view_as_image_plot_format, clip_image_to_zer
 from utils.profiling import treatment_profiles, treatment_center_cells
 from models.LoadModels import LoadVAEmodel
 
+from numpy import dot
+from numpy.linalg import norm
 
 def img_saturate(img):
     return img / img.max()
@@ -86,6 +88,71 @@ def plot_VAE_performance(plotdata, file=None, title=None):
     
     plt.close()
 
+def plot_morphing_images(x0, x1, model, file=None, title=None, control_text=None,  target_text=None):
+    #model could be eg. "model_dump/outputs_2022-12-04 - 12-20-15/"
+    #x0.shape and x1.shape should be torch.Size([3, 68, 68])
+    
+    #vae, validation_data, training_data, VAE_settings = LoadVAEmodel(model)
+    vae = model
+    outputs0 = vae(x0[None,:,:,:])
+    outputs1 = vae(x1[None,:,:,:])
+
+    z0 = outputs0["z"].detach().numpy()
+    z1 = outputs1["z"].detach().numpy()
+
+    zs = [z0] + list(np.linspace(z0, z1, num=8)) + [z1]
+
+    cp = []
+    for i in range(len(zs)):
+        cos_sim = (dot(zs[i], z1.transpose())/(norm(zs[i])*norm(z1.transpose())))[0][0]
+        cp.append(cos_sim)
+    # create figure
+    fig = plt.figure(figsize=(25, 10))
+
+    # setting values to rows and column variables
+    rows = 1
+    columns = len(zs)
+
+    # Adds a subplot at the 1st position
+    for i in range(columns):
+        if i == 0:
+            fig.add_subplot(rows, columns, i+1)
+            img = view_as_image_plot_format(x0)
+            plt.imshow(img)
+            plt.axis('off')
+        elif i == columns-1:
+            fig.add_subplot(rows, columns, i+1)
+            img = view_as_image_plot_format(x1)
+            plt.imshow(img)
+            plt.axis('off')
+        else:
+            fig.add_subplot(rows, columns, i+1)
+            plt.imshow((torch.permute(vae.observation(torch.Tensor(zs[i]))[0], (1, 2, 0)) * 255).detach().numpy().astype(np.uint8))
+            plt.axis('off')
+        if i == 0:
+            plt.title(control_text, y=-0.20, fontsize=26)
+        elif i == len(zs)-1:
+            plt.title(target_text, y=-0.20, fontsize=26)
+        else:
+            plt.title("{:.2f}".format(cp[i]), fontsize=26)
+    if file == None:
+        plt.show()
+    else: 
+        plt.savefig(file)
+        plt.show()
+    
+    plt.close()
+
+#### PLOT INTERPOLATION OF RECONSTRUCTONS ####
+def plot_control_cell_to_target_cell(target, images, df, model,file = None, control='DMSO_0.0', control_text = 'DMSO',  target_text=None):
+    tp = treatment_profiles(df)
+    tcc = treatment_center_cells(df,tp,p=2)
+    control_cell = images[tcc[tcc['Treatment'] == 'DMSO_0.0'].index[0]]
+    target_cell = images[tcc[tcc['Treatment'] == target].index[0]]
+    plot_morphing_images(control_cell, target_cell, model, file=file, title=None, control_text = control_text,  target_text=target_text) 
+    return 
+
+
 def plot_cosine_similarity_old(x0, x1, model, file=None, title=None):
     #model could be eg. "model_dump/outputs_2022-12-04 - 12-20-15/"
     #x0.shape and x1.shape should be torch.Size([3, 68, 68])
@@ -134,16 +201,9 @@ def plot_cosine_similarity_old(x0, x1, model, file=None, title=None):
     plt.close()
 
 
-def plot_cosine_similarity(target, metadata_latent, vae, file=None, title=None):
+def plot_cosine_similarity_old2(target, metadata_latent, vae, file=None, title=None):
     #model could be eg. "model_dump/outputs_2022-12-04 - 12-20-15/"
     #x0.shape and x1.shape should be torch.Size([3, 68, 68])
-    
-    '''vae = model
-    outputs0 = vae(x0[None,:,:,:])
-    outputs1 = vae(x1[None,:,:,:])
-
-    z0 = outputs0["z"].detach().numpy()
-    z1 = outputs1["z"].detach().numpy()'''
     
     tp = treatment_profiles(metadata_latent)
     tcc = treatment_center_cells(metadata_latent,tp,p=2)
