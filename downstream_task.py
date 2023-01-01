@@ -77,3 +77,8 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
 
     #### PRINT ACCURACY ####
     cprint("Model Accuracy: {}".format(Accuracy(confusion_matrix)), logfile)
+    cprint("Model Precision: {}".format(precision(confusion_matrix)), logfile) 
+    cprint("Model Recall: {}".format(recall(confusion_matrix)), logfile)
+    cprint("Model F1: {}".format(2 * (precision(confusion_matrix) * recall(confusion_matrix)) / 
+                                 (precision(confusion_matrix) + recall(confusion_matrix)), logfile)
+
