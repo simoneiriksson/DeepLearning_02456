@@ -24,7 +24,7 @@ from utils.plotting import plot_control_cell_to_target_cell
         
 def downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile=None):
     cprint("Starting downstream tasks", logfile)
-    device = 'cpu'
+    #device = 'cpu'
     vae = vae.to(device)
 
     _ = vae.eval() # because of batch normalization
@@ -44,8 +44,8 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     create_directory(output_folder + "interpolations")
     #treatments list
     tl = metadata['Treatment'].sort_values().unique()
-    #for treatment in [tl[0]]:
-    for treatment in tl:
+    for treatment in [tl[0]]:
+    #for treatment in tl:
         filename = output_folder + "interpolations/" + treatment.replace('/', "_") + ".png"
         cprint(f"doing: {filename}", logfile)
         plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, device, file=filename,  control='DMSO_0.0', control_text = 'DMSO_0.0',  target_text=treatment)
@@ -74,7 +74,7 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     cm = sns.heatmap(df_cm, annot=True)
     figure = cm.get_figure()
     plt.gcf()
-    figure.savefig(output_folder + "conf_matrix.png", bbox_inches = 'tight')
+    figure.savefig(output_folder + "images/conf_matrix.png", bbox_inches = 'tight')
 
 
     #### PRINT ACCURACY ####
