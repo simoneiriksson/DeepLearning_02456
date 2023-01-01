@@ -155,8 +155,8 @@ def read_metadata_and_images(use_server_path = True, \
                             load_subset_of_images = None, 
                             save_images_to_singlefile = False,
                             logfile = None):
-    if load_images_from_individual_files==False & load_subset_of_images!=None:
-        cprint("You cannot use a subset of data, when loading from images.pt", logfile)
+    #if load_images_from_individual_files==False & load_subset_of_images!=None:
+    #    cprint("You cannot use a subset of data, when loading from images.pt", logfile)
     if use_server_path == 1:
         path = get_server_directory_path()
     else: path = "../data/all/"

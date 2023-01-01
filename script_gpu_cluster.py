@@ -42,7 +42,7 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-images, metadata, mapping = read_metadata_and_images(use_server_path = False, \
+images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
                                                         load_images_from_individual_files = True, 
                                                         load_subset_of_images = 100, 
                                                         save_images_to_singlefile = False,
@@ -69,7 +69,7 @@ cprint("VAE Configs", logfile)
 # models to choose from: 'SparseVAEGAN', 'CytoVAEGAN', 'CytoVAE', 'SparseVAE'
 # start another training session
 params = {
-    'num_epochs' : 10,
+    'num_epochs' : 2,
     'batch_size' : min(64, len(train_set)),
     'learning_rate' : 1e-3,
     'weight_decay' : 1e-3,
@@ -109,7 +109,7 @@ Trainer(models=models, \
     logfile=logfile)
 
 cprint("finished training", logfile)
-print(training_data)
+
 
 _ = vae.eval() # because of batch normalization
 #plot_VAE_performance(training_data, file=None, title='VAE - learning')

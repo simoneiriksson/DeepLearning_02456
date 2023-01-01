@@ -1,12 +1,11 @@
 import pandas as pd
 import numpy as np
 # extracting latent variables for each image/cell
-def LatentVariableExtraction(metadata, images, batch_size, vae):
+def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=None):
     metadata['Well_unique'] = metadata['Image_Metadata_Well_DAPI'] + '_' + metadata['Image_Metadata_Plate_DAPI']
     metadata['Treatment'] = metadata['Image_Metadata_Compound'] + '_' + metadata['Image_Metadata_Concentration'].astype(str)
     metadata['week'] = metadata['Image_PathName_DAPI'].str.split("_", n=1, expand = True)[0]
     metadata['row_id'] = np.arange(len(metadata))
-    images.shape[0]
     batch_size=min(batch_size, len(images))
     batch_offset = np.arange(start=0, stop=images.shape[0]+1, step=batch_size)
 
@@ -16,8 +15,9 @@ def LatentVariableExtraction(metadata, images, batch_size, vae):
     for j, item in enumerate(batch_offset[:-1]):
         start = batch_offset[j]
         end = batch_offset[j+1]
-        outputs = vae(images[start:end,:,:,:])
-        z = outputs["z"]
+        image_subset = images[start:end,:,:,:].to(device)
+        outputs = vae(image_subset)
+        z = outputs["z"].to('cpu')
         columns_list = ["latent_"+str(z) for z in range(z.shape[1])]
         z_df = pd.DataFrame(z.detach().numpy(), columns=columns_list)
         z_df.index = list(range(start,end))
@@ -30,8 +30,9 @@ def LatentVariableExtraction(metadata, images, batch_size, vae):
     end = images.shape[0]
     if start != end:
         #print(start, end)
-        outputs = vae(images[start:end,:,:,:])
-        z = outputs["z"]
+        image_subset = images[start:end,:,:,:].to(device)
+        outputs = vae(image_subset)
+        z = outputs["z"].to('cpu')
         #print("z.shape", z.shape)
         columns_list = ["latent_"+str(z) for z in range(z.shape[1])]
         z_df = pd.DataFrame(z.detach().numpy(), columns=columns_list)

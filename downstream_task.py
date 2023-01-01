@@ -24,17 +24,18 @@ from utils.plotting import plot_control_cell_to_target_cell
         
 def downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile=None):
     cprint("Starting downstream tasks", logfile)
+    vae = vae.to(device)
 
     _ = vae.eval() # because of batch normalization
 
     cprint("Extract a few images", logfile)
-    extract_a_few_images(output_folder + "images", vae=vae, no_images=10, dataset=train_set, device=device)
+    extract_a_few_images(output_folder + "images", vae=vae, no_images=10, dataset=train_set, device=device, logfile=logfile)
     cprint("saved images", logfile)
 
     #### CALCULATE LATENT REPRESENTATION FOR ALL IMAGES ####
     cprint("Calculate latent representation for all images", logfile)
     batch_size= 10000
-    metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
+    metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae, device)
     cprint("Done calculating latent sapce", logfile)
 
     
@@ -42,11 +43,11 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     create_directory(output_folder + "interpolations")
     #treatments list
     tl = metadata['Treatment'].sort_values().unique()
-    for treatment in [tl[0]]:
-#    for treatment in tl:
+    #for treatment in [tl[0]]:
+    for treatment in tl:
         filename = output_folder + "interpolations/" + treatment.replace('/', "_") + ".png"
         print("doing: ", filename)
-        plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, file=filename,  control='DMSO_0.0', control_text = None,  target_text=None)
+        plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, device, file=filename,  control='DMSO_0.0', control_text = None,  target_text=None)
 
     #### PLOT LATENT SPACE HEATMAP ####
     cprint("Plotting latent space heatmap", logfile)

@@ -88,17 +88,17 @@ def plot_VAE_performance(plotdata, file=None, title=None):
     
     plt.close()
 
-def plot_morphing_images(x0, x1, model, file=None, title=None, control_text=None,  target_text=None):
+def plot_morphing_images(x0, x1, model, device, file=None, title=None, control_text=None,  target_text=None):
     #model could be eg. "model_dump/outputs_2022-12-04 - 12-20-15/"
     #x0.shape and x1.shape should be torch.Size([3, 68, 68])
     
     #vae, validation_data, training_data, VAE_settings = LoadVAEmodel(model)
     vae = model
-    outputs0 = vae(x0[None,:,:,:])
-    outputs1 = vae(x1[None,:,:,:])
+    outputs0 = vae(x0[None,:,:,:].to(device))
+    outputs1 = vae(x1[None,:,:,:].to(device))
 
-    z0 = outputs0["z"].detach().numpy()
-    z1 = outputs1["z"].detach().numpy()
+    z0 = outputs0["z"].to('cpu').detach().numpy()
+    z1 = outputs1["z"].to('cpu').detach().numpy()
 
     zs = [z0] + list(np.linspace(z0, z1, num=8)) + [z1]
 
@@ -127,7 +127,7 @@ def plot_morphing_images(x0, x1, model, file=None, title=None, control_text=None
             plt.axis('off')
         else:
             fig.add_subplot(rows, columns, i+1)
-            plt.imshow((torch.permute(vae.observation(torch.Tensor(zs[i]))[0], (1, 2, 0)) * 255).detach().numpy().astype(np.uint8))
+            plt.imshow((torch.permute(vae.observation(torch.Tensor(zs[i]).to(device))[0], (1, 2, 0)) * 255).to('cpu').detach().numpy().astype(np.uint8))
             plt.axis('off')
         if i == 0:
             plt.title(control_text, y=-0.20, fontsize=26)
@@ -144,12 +144,12 @@ def plot_morphing_images(x0, x1, model, file=None, title=None, control_text=None
     plt.close()
 
 #### PLOT INTERPOLATION OF RECONSTRUCTONS ####
-def plot_control_cell_to_target_cell(target, images, df, model,file = None, control='DMSO_0.0', control_text = 'DMSO',  target_text=None):
+def plot_control_cell_to_target_cell(target, images, df, model, device, file = None, control='DMSO_0.0', control_text = 'DMSO',  target_text=None):
     tp = treatment_profiles(df)
     tcc = treatment_center_cells(df,tp,p=2)
     control_cell = images[tcc[tcc['Treatment'] == 'DMSO_0.0'].index[0]]
     target_cell = images[tcc[tcc['Treatment'] == target].index[0]]
-    plot_morphing_images(control_cell, target_cell, model, file=file, title=None, control_text = control_text,  target_text=target_text) 
+    plot_morphing_images(control_cell, target_cell, model, device, file=file, title=None, control_text = control_text,  target_text=target_text) 
     return 
 
 
@@ -302,7 +302,7 @@ def recall(confusion_matrix):
     return recall.mean()
 
 
-def extract_a_few_images(folder, vae, no_images, dataset, device):
+def extract_a_few_images(folder, vae, no_images, dataset, device, logfile=None):
     ######### extract a few images already #########
     n = no_images
     for i in range(n):

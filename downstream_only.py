@@ -35,7 +35,7 @@ from VAEGAN_trainer import VAEGAN_trainer
 
 ######### Utilities #########
 # choose correct output folder for LoadVAEmodel() below!!!
-output_folder = "./dump/outputs_2023-01-01 - 11-05-09/"
+output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
 
 constant_seed()
 logfile = create_logfile(output_folder + "downstream_log.log")
@@ -44,7 +44,7 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-images, metadata, mapping = read_metadata_and_images(use_server_path = False, \
+images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
                                                         load_images_from_individual_files = True, 
                                                         load_subset_of_images = 1000, 
                                                         save_images_to_singlefile = False,
