@@ -17,15 +17,12 @@ from models.LoadModels import LoadVAEmodel, initVAEmodel
 from utils.data_transformers import normalize_every_image_channels_seperately_inplace
 from utils.data_transformers import normalize_channels_inplace, batch_normalize_images
 from utils.data_transformers import SingleCellDataset
-from utils.plotting import plot_VAE_performance, plot_image_channels, extract_a_few_images
-from utils.data_preparation import create_directory, read_metadata, get_relative_image_paths, load_images
+from utils.plotting import plot_VAE_performance
+from utils.data_preparation import create_directory
 from utils.data_preparation import read_metadata_and_images
 from utils.data_preparation import get_MOA_mappings, shuffle_metadata, split_metadata
-from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
+from utils.utils import cprint, get_datetime, create_logfile, constant_seed
 from utils.utils import save_model
-from utils.profiling import LatentVariableExtraction
-from utils.plotting import heatmap, plot_cosine_similarity
-from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
 from downstream_task import downstream_task
 
 import importlib
