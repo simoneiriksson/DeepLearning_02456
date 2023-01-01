@@ -34,12 +34,11 @@ from VAE_trainer import VAE_trainer
 from VAEGAN_trainer import VAEGAN_trainer
 
 ######### Utilities #########
+# choose correct output folder for LoadVAEmodel() below!!!
+output_folder = "./dump/outputs_2023-01-01 - 11-05-09/"
 
 constant_seed()
-datetime = get_datetime()
-output_folder = "dump/outputs_{}/".format(datetime)
-create_directory(output_folder)
-logfile = create_logfile(output_folder + "log.log")
+logfile = create_logfile(output_folder + "downstream_log.log")
 cprint("output_folder is: {}".format(output_folder), logfile)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -67,8 +66,6 @@ train_set = SingleCellDataset(metadata_train, images, mapping)
 validation_set = SingleCellDataset(metadata_validation, images, mapping)
 
 #### LOAD TRAINED MODEL ####
-# choose correct output folder for LoadVAEmodel() below!!!
-output_folder = "./dump/outputs_2023-01-01 - 11-05-09/"
 model, validation_data, training_data, params, vi = LoadVAEmodel(output_folder)
 
 cprint("model is of type {}".format(params['model_type']), logfile)
