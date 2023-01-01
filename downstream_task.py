@@ -51,18 +51,18 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     #### PLOT LATENT SPACE HEATMAP ####
     cprint("Plotting latent space heatmap", logfile)
     # heatmap of (abs) correlations between latent variables and MOA classes
-    heatmap = heatmap(metadata_latent)
+    heatmap_res = heatmap(metadata_latent)
     # plot heatmap
     plt.figure(figsize = (8,4))
-    heat = sns.heatmap(heatmap)
+    heat = sns.heatmap(heatmap_res)
     figure = heat.get_figure()
     plt.gcf()
     figure.savefig(output_folder + "images/latent_var_heatmap.png", bbox_inches = 'tight')
-
+    plt.close()
 
     #### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####
     cprint("Nearest neighbor classification (Not-Same-Compound)", logfile)
-    targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2)
+    targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, p=2)
 
     #### PLOT CONFUSION MATRIX ####
     confusion_matrix = moa_confusion_matrix(targets, predictions)

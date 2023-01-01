@@ -44,7 +44,7 @@ cprint(f"Using device: {device}", logfile)
 
 images, metadata, mapping = read_metadata_and_images(use_server_path = False, \
                                                         load_images_from_individual_files = True, 
-                                                        load_subset_of_images = 1000, 
+                                                        load_subset_of_images = 100, 
                                                         save_images_to_singlefile = False,
                                                         logfile = logfile)
 # Settings for handing in:
@@ -66,6 +66,7 @@ validation_set = SingleCellDataset(metadata_validation, images, mapping)
 ######### VAE Configs #########
 cprint("VAE Configs", logfile)
 
+# models to choose from: 'SparseVAEGAN', 'CytoVAEGAN', 'CytoVAE', 'SparseVAE'
 # start another training session
 params = {
     'num_epochs' : 10,
@@ -79,6 +80,8 @@ params = {
     'beta': 0.5, 
     'p_norm': 2.0
     }
+
+
 
 models, validation_data, training_data, params, vi = initVAEmodel(params)
 cprint("params: {}".format(params), logfile)
