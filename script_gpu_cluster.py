@@ -24,8 +24,9 @@ from utils.data_preparation import get_MOA_mappings, shuffle_metadata, split_met
 from utils.utils import cprint, get_datetime, create_logfile, constant_seed, StatusString
 from utils.utils import save_model
 from utils.profiling import LatentVariableExtraction
+from utils.plotting import heatmap, plot_cosine_similarity
+from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
 
-from utils.plotting import plot_cosine_similarity
 
 import importlib
 
@@ -120,59 +121,65 @@ save_model(models, validation_data, training_data, params, output_folder)
 #                 DOWNSTREAM TASKS                     #
 #                                                      #
 ########################################################
+cprint("Starting downstream tasks", logfile)
 
 _ = vae.eval() # because of batch normalization
 #plot_VAE_performance(training_data, file=None, title='VAE - learning')
+cprint("Plotting VAE performance", logfile)
 create_directory(output_folder + "images")
 plot_VAE_performance(training_data, file=output_folder + "images/training_data.png", title='VAE - learning')
 plot_VAE_performance(validation_data, file=output_folder + "images/validation_data.png", title='VAE - validation')
 
-cprint("Extract a few images already", logfile)
+cprint("Extract a few images", logfile)
 extract_a_few_images(output_folder + "images", vae=vae, no_images=10, dataset=train_set, device=device)
 cprint("saved images", logfile)
 
-#### CALCULATE LATENT SPACE FOR ALL IMAGES ####
+#### CALCULATE LATENT REPRESENTATION FOR ALL IMAGES ####
+cprint("Calculate latent representation for all images", logfile)
 batch_size= 10000
 metadata_latent = LatentVariableExtraction(metadata, images, batch_size, vae)
-
+cprint("Done calculating latent sapce", logfile)
 
 #### PLOT INTERPOLATION OF RECONSTRUCTONS ####
+cprint("Plotting interpolations of reconstructions", logfile)
 create_directory(output_folder + "interpolations")
 #treatments list
 tl = metadata['Treatment'].sort_values().unique()
 #choosing the (target) treatment to plot
-for target in tl[0]:
+#for target in [tl[0]]:
+for target in tl:
+#target = tl[0]  #'ALLN_100.0'
     plot_cosine_similarity(target, metadata_latent, vae, output_folder + "interpolations/" + target + ".png")
 
-
-# #### PLOT LATENT SPACE HEATMAP ####
-# # heatmap of (abs) correlations between latent variables and MOA classes
-# heatmap = heatmap(metadata_latent)
-# # plot heatmap
-# plt.figure(figsize = (8,4))
-# heat = sns.heatmap(heatmap)
-# figure = heat.get_figure()
-# plt.gcf()
-# figure.savefig(downstream_folder + "latent_var_heatmap.png", bbox_inches = 'tight')
-
-
-# #### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####
-# targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2)
+#### PLOT LATENT SPACE HEATMAP ####
+cprint("Plotting latent space heatmap", logfile)
+# heatmap of (abs) correlations between latent variables and MOA classes
+heatmap = heatmap(metadata_latent)
+# plot heatmap
+plt.figure(figsize = (8,4))
+heat = sns.heatmap(heatmap)
+figure = heat.get_figure()
+plt.gcf()
+figure.savefig(output_folder + "images/latent_var_heatmap.png", bbox_inches = 'tight')
 
 
-# #### PLOT CONFUSION MATRIX ####
-# confusion_matrix = moa_confusion_matrix(targets, predictions)
-# df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
-#                          columns = [i for i in mapping])
-# plt.figure(figsize = (12,7))
-# cm = sns.heatmap(df_cm, annot=True)
-# figure = cm.get_figure()
-# plt.gcf()
-# figure.savefig(downstream_folder + "conf_matrix.png", bbox_inches = 'tight')
+#### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####
+cprint("Nearest neighbor classification (Not-Same-Compound)", logfile)
+targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2)
+
+#### PLOT CONFUSION MATRIX ####
+confusion_matrix = moa_confusion_matrix(targets, predictions)
+df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
+                         columns = [i for i in mapping])
+plt.figure(figsize = (12,7))
+cm = sns.heatmap(df_cm, annot=True)
+figure = cm.get_figure()
+plt.gcf()
+figure.savefig(output_folder + "conf_matrix.png", bbox_inches = 'tight')
 
 
-# #### PRINT ACCURACY ####
-# print("Model Accuracy:", Accuracy(confusion_matrix))
+#### PRINT ACCURACY ####
+cprint("Model Accuracy: {}".format(Accuracy(confusion_matrix)), logfile)
 
 
 

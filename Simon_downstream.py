@@ -25,6 +25,8 @@ from utils.utils import cprint, get_datetime, create_logfile, constant_seed, Sta
 from utils.utils import save_model
 from utils.profiling import LatentVariableExtraction
 from utils.plotting import heatmap
+from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
+
 
 from utils.plotting import plot_cosine_similarity
 
@@ -125,23 +127,23 @@ plt.gcf()
 figure.savefig(output_folder + "images/latent_var_heatmap.png", bbox_inches = 'tight')
 
 
-# #### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####
-# targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2)
+#### NEAREST NEIGHBOR CLASSIFICATION (Not-Same-Compound) ####
+targets, predictions = NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2)
 
 
-# #### PLOT CONFUSION MATRIX ####
-# confusion_matrix = moa_confusion_matrix(targets, predictions)
-# df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
-#                          columns = [i for i in mapping])
-# plt.figure(figsize = (12,7))
-# cm = sns.heatmap(df_cm, annot=True)
-# figure = cm.get_figure()
-# plt.gcf()
-# figure.savefig(downstream_folder + "conf_matrix.png", bbox_inches = 'tight')
+#### PLOT CONFUSION MATRIX ####
+confusion_matrix = moa_confusion_matrix(targets, predictions)
+df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
+                         columns = [i for i in mapping])
+plt.figure(figsize = (12,7))
+cm = sns.heatmap(df_cm, annot=True)
+figure = cm.get_figure()
+plt.gcf()
+figure.savefig(output_folder + "conf_matrix.png", bbox_inches = 'tight')
 
 
-# #### PRINT ACCURACY ####
-# print("Model Accuracy:", Accuracy(confusion_matrix))
+#### PRINT ACCURACY ####
+print("Model Accuracy:", Accuracy(confusion_matrix))
 
 
 
