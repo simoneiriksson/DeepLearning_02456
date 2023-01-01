@@ -139,7 +139,7 @@ def plot_morphing_images(x0, x1, model, file=None, title=None, control_text=None
         plt.show()
     else: 
         plt.savefig(file)
-        plt.show()
+        #plt.show()
     
     plt.close()
 
@@ -255,7 +255,7 @@ def heatmap(metadata_latent):
     return heatmap_matrix.abs()
    
 
-def NSC_NearestNeighbor_Classifier(metadata_latent, mapping, p=2):
+def NSC_NearestNeighbor_Classifier(metadata_latent, p=2):
     treatment_profiles_df = treatment_profiles(metadata_latent)
     latent_cols = [col for col in metadata_latent.columns if type(col)==str and col[0:7]=='latent_']
     
