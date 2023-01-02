@@ -18,7 +18,7 @@ from utils.data_preparation import create_directory, read_metadata, get_relative
 from utils.utils import cprint
 from utils.profiling import LatentVariableExtraction
 from utils.plotting import heatmap
-from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy, precision, recall
+from utils.profiling import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy, precision, recall
 from utils.profiling import treatment_profiles, treatment_center_cells
 from utils.plotting import plot_control_cell_to_target_cell
         

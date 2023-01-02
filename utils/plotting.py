@@ -255,51 +255,9 @@ def heatmap(metadata_latent):
     return heatmap_matrix.abs()
    
 
-def NSC_NearestNeighbor_Classifier(metadata_latent, p=2):
-    treatment_profiles_df = treatment_profiles(metadata_latent)
-    latent_cols = [col for col in metadata_latent.columns if type(col)==str and col[0:7]=='latent_']
-    
-    for compound in metadata_latent['Image_Metadata_Compound'].unique():
-        A_set = treatment_profiles_df[treatment_profiles_df['Image_Metadata_Compound'] == compound]
-        B_set = treatment_profiles_df[treatment_profiles_df['Image_Metadata_Compound'] != compound]
-        for A in A_set.index:
-            A_treatment = A_set.loc[A]['Treatment']
-            diffs = (abs(B_set[latent_cols] - A_set.loc[A][latent_cols]))**p
-            diffs_sum = diffs.sum(axis=1)**(1/p)
-            diffs_min = diffs_sum.min()
-            treatment_profiles_df.loc[treatment_profiles_df['Treatment']==A_treatment,'moa_pred'] = B_set.at[diffs[diffs_sum == diffs_min].index[0], 'moa']
-    return treatment_profiles_df['moa'], treatment_profiles_df['moa_pred']
+
 
     
-def moa_confusion_matrix(targets, predictions):
-    nb_classes = len(targets.unique())
-    moa_classes = targets.sort_values().unique()
-    classes = np.zeros((nb_classes, nb_classes))
-    for i in range(nb_classes):
-        for j in range(nb_classes):
-            for t in range(len(targets)):
-                if targets[t] == moa_classes[i] and predictions[t] == moa_classes[j]:
-                    classes[i,j] += 1
-    confusion_matrix = classes  
-    return confusion_matrix
-
-    
-def Accuracy(confusion_matrix):
-    class_accuracy = 100*confusion_matrix.diagonal()/confusion_matrix.sum(1)
-    class_accuracy = class_accuracy.mean()
-    return class_accuracy
-
-    
-def precision(confusion_matrix):
-    truepos = np.diag(confusion_matrix)
-    precision = truepos / np.sum(confusion_matrix, axis=0)
-    return precision.mean() * 100
-
-
-def recall(confusion_matrix):
-    truepos = np.diag(confusion_matrix)
-    recall = truepos / np.sum(confusion_matrix, axis=1)
-    return recall.mean() * 100
 
 
 def extract_a_few_images(folder, vae, no_images, dataset, device, logfile=None):
