@@ -17,9 +17,9 @@ def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=
     for j, item in enumerate(batch_offset[:-1]):
         start = batch_offset[j]
         end = batch_offset[j+1]
-        image_subset = images[start:end,:,:,:].to(device)
+        image_subset = images[start:end,:,:,:]
         outputs = vae(image_subset)
-        z = outputs["z"].to('cpu')
+        z = outputs["z"]
         columns_list = ["latent_"+str(z) for z in range(z.shape[1])]
         z_df = pd.DataFrame(z.detach().numpy(), columns=columns_list)
         z_df.index = list(range(start,end))
@@ -33,9 +33,9 @@ def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=
     end = images.shape[0]
     if start != end:
         #print(start, end)
-        image_subset = images[start:end,:,:,:].to(device)
+        image_subset = images[start:end,:,:,:]
         outputs = vae(image_subset)
-        z = outputs["z"].to('cpu')
+        z = outputs["z"]
         #print("z.shape", z.shape)
         columns_list = ["latent_"+str(z) for z in range(z.shape[1])]
         z_df = pd.DataFrame(z.detach().numpy(), columns=columns_list)
@@ -69,7 +69,7 @@ def treatment_profiles(nm):
     mean_over_treatment_well_unique = nm.groupby(['Treatment', 'Image_Metadata_Compound', 'Image_Metadata_Concentration','Well_unique', 'moa'], as_index=False).mean()
     median_over_treatment = mean_over_treatment_well_unique.groupby(['Treatment', 'Image_Metadata_Compound', 'Image_Metadata_Concentration', 'moa'], as_index=False).median()
     return median_over_treatment
-
+    
 # Treatment Profiles
 #def treatment_profiles(df):
 #  t = df.groupby(['Treatment','Well_unique'], as_index=False).mean().groupby(['Treatment']).median().iloc[:,-256:]

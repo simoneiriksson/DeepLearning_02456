@@ -25,7 +25,7 @@ from utils.utils import cprint, get_datetime, create_logfile, constant_seed, Sta
 from utils.utils import save_model
 from utils.profiling import LatentVariableExtraction
 #from utils.plotting import heatmap, plot_cosine_similarity
-from utils.plotting import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
+from utils.profiling import NSC_NearestNeighbor_Classifier, moa_confusion_matrix, Accuracy
 from downstream_task import downstream_task
 
 import importlib
@@ -36,7 +36,9 @@ from VAEGAN_trainer import VAEGAN_trainer
 ######### Utilities #########
 # choose correct output folder for LoadVAEmodel() below!!!
 #output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
-output_folder = "./dump/outputs_2022-12-28 - 09-53-14/"
+#output_folder = "./dump/outputs_2022-12-28 - 09-53-14/"
+output_folder = "./dump/outputs_2023-01-01 - 22-24-26/"
+
 
 constant_seed()
 logfile = create_logfile(output_folder + "downstream_log.log")
@@ -45,9 +47,9 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
-                                                        load_images_from_individual_files = False, 
-                                                        load_subset_of_images = None, 
+images, metadata, mapping = read_metadata_and_images(use_server_path = False, \
+                                                        load_images_from_individual_files = True, 
+                                                        load_subset_of_images = 50000, 
                                                         save_images_to_singlefile = False,
                                                         logfile = logfile)
 # Settings for handing in:
@@ -60,7 +62,6 @@ images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
 # Alternative, this can be uncommented and like in the Lafarge article, we can do batchwise normalization
 normalize_every_image_channels_seperately_inplace(images, verbose=True)
 
-metadata = shuffle_metadata(metadata)
 metadata_train, metadata_validation = split_metadata(metadata, split_fraction = .90)
 
 train_set = SingleCellDataset(metadata_train, images, mapping)
