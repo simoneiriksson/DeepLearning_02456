@@ -4,9 +4,9 @@ from collections import defaultdict
 import torch, torch.nn as nn
 import numpy as np
 
-def VAEGAN_trainer(models, validation_data, training_data, params, vi_VAEGAN, train_loader, device, validation_loader, print_every=1, logfile=None):
+def VAEGAN_trainer(models, validation_data, training_data, params, vi, train_loader, device, validation_loader, print_every=1, logfile=None):
     VAE = models[0].to(device)
-    DISCmodel = models[0].to(device)
+    DISCmodel = models[1].to(device)
 
     VAE_optimizer = torch.optim.Adam(VAE.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
     DISCmodel_optimizer = torch.optim.Adam(DISCmodel.parameters(), lr=params['learning_rate'], weight_decay=params['weight_decay'])
@@ -27,7 +27,7 @@ def VAEGAN_trainer(models, validation_data, training_data, params, vi_VAEGAN, tr
         _ = DISCmodel.train()
         for x, _ in train_loader:
             x = x.to(device)
-            losses_mean, losses, outputs = vi_VAEGAN(VAE, DISCmodel, x)
+            losses_mean, losses, outputs = vi(VAE, DISCmodel, x)
 
             # unfolding losses:
             image_loss = losses_mean['image_loss']
@@ -72,7 +72,7 @@ def VAEGAN_trainer(models, validation_data, training_data, params, vi_VAEGAN, tr
                 # batchwise normalization. Only to be used if imagewise normalization has been ocmmented out.
                 # x = batch_normalize_images(x)
                 x = x.to(device)
-                losses_mean, losses, outputs = vi_VAEGAN(VAE, DISCmodel, x)
+                losses_mean, losses, outputs = vi(VAE, DISCmodel, x)
 
                 # unfolding losses:
                 image_loss = losses_mean['image_loss']
@@ -113,6 +113,6 @@ def VAEGAN_trainer(models, validation_data, training_data, params, vi_VAEGAN, tr
 
         VAE.update_()
         DISCmodel.update_()
-        vi_VAEGAN.update_vi()
+        vi.update_vi()
 
     return validation_data, training_data, params, models

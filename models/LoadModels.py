@@ -61,7 +61,7 @@ def initVAEmodel(params):
     if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
     else: p_norm = 2
 
-    if model_type ['Cyto_nonvar', 'CytoVAE']:
+    if model_type in ['Cyto_nonvar', 'CytoVAE']:
         vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference_VAE(beta=params['beta'], p_norm = p_norm)
         model = [vae]
