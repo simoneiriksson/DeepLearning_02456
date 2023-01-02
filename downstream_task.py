@@ -54,9 +54,12 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     cprint("Plotting latent space heatmap", logfile)
     # heatmap of (abs) correlations between latent variables and MOA classes
     heatmap_res = heatmap(metadata_latent)
+    # sorting latent variables by (abs) sum
+    sorted_columns = heatmap_res.sum(axis=0).sort_values(ascending=False).index
+    heatmap_res = heatmap_res.reindex(sorted_columns , axis=1)
     # plot heatmap
     plt.figure(figsize = (8,4))
-    heat = sns.heatmap(heatmap_res)
+    heat = sns.heatmap(heatmap_res)#.set(xticklabels=[])
     figure = heat.get_figure()
     plt.gcf()
     figure.savefig(output_folder + "images/latent_var_heatmap.png", bbox_inches = 'tight')
