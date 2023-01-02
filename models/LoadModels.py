@@ -10,6 +10,7 @@ from models.VariationalInference_VAE import VariationalInference_VAE
 from models.VariationalInference_VAEGAN import VariationalInference_VAEGAN
 from models.VariationalInference_SparseVAEGAN import VariationalInference_SparseVAEGAN
 from models.VariationalInference_SparseVAE import VariationalInference_SparseVAE
+from utils.utils import cprint
 
 def LoadVAEmodel(folder, model_type=None, device="cpu"):
     params = torch.load(folder + "params.pt", map_location=torch.device(device))
@@ -60,27 +61,28 @@ def initVAEmodel(params):
     if 'p_norm' in params.keys(): p_norm = params['p_norm'] 
     else: p_norm = 2
 
-    if model_type == 'Cyto_nonvar':
+    if model_type ['Cyto_nonvar', 'CytoVAE']:
         vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference_VAE(beta=params['beta'], p_norm = p_norm)
         model = [vae]
 
-    if model_type == 'Cyto_VAEGAN':
+    elif model_type == 'Cyto_VAEGAN':
         vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         disc = DISC(params['image_shape'], params['latent_features'])
         model = [vae, disc]
         vi = VariationalInference_VAEGAN(beta=params['beta'], p_norm = p_norm)
 
-    if model_type == 'SparseVAEGAN':
+    elif model_type == 'SparseVAEGAN':
         vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
         disc = DISC(params['image_shape'], params['latent_features'])
         model = [vae, disc]
         vi = VariationalInference_SparseVAEGAN(beta=params['beta'], alpha=params['alpha'], p_norm = p_norm)
 
-    if model_type == 'SparseVAE':
+    elif model_type == 'SparseVAE':
         vae = SparseVariationalAutoencoder(params['image_shape'], params['latent_features'])
         vi = VariationalInference_SparseVAE(beta=params['beta'], alpha=params['alpha'], p_norm = p_norm)
         model = [vae]
-        
+    else:
+        cprint(f"incorrect model_type: {model_type}")  
     return model, validation_performance, training_performance, params, vi
 
