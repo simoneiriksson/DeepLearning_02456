@@ -13,7 +13,7 @@ logfile = create_logfile(output_folder + "downstream_log.log")
 cprint("output_folder is: {}".format(output_folder), logfile)
 
 path = get_server_directory_path()
-path = '../data/all/'
+#path = '../data/all/'
 create_directory('../data/')
 metadata_all = read_metadata(path + "metadata.csv") 
 cprint("loading images from individual files", logfile)

@@ -47,10 +47,11 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-images, metadata, mapping = read_metadata_and_images(use_server_path = False, \
-                                                        load_images_from_individual_files = True, 
-                                                        load_subset_of_images = 50000, 
+images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
+                                                        load_images_from_individual_files = False, 
+                                                        load_subset_of_images = None, 
                                                         save_images_to_singlefile = False,
+                                                        shuffle = False
                                                         logfile = logfile)
 # Settings for handing in:
 #images, metadata, mapping = read_metadata_and_images(use_server_path = True, \

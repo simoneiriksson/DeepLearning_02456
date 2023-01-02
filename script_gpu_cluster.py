@@ -42,10 +42,11 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
+images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
                                                         load_images_from_individual_files = False, 
                                                         load_subset_of_images = None, 
                                                         save_images_to_singlefile = False,
+                                                        shuffle = True
                                                         logfile = logfile)
 # Settings for handing in:
 #images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
@@ -131,8 +132,8 @@ save_model(models, validation_data, training_data, params, output_folder)
 #                                                      #
 ########################################################
 
-downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile)
-    
+downstream_task(vae, metadata_all, train_set, images, mapping, device, output_folder, logfile)
+
 cprint("output_folder is: {}".format(output_folder), logfile)
 cprint("script done.", logfile)
 

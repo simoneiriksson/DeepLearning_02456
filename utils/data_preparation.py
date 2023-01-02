@@ -154,6 +154,7 @@ def read_metadata_and_images(use_server_path = True, \
                             load_images_from_individual_files = True, 
                             load_subset_of_images = None, 
                             save_images_to_singlefile = False,
+                            shuffle = True
                             logfile = None):
     #if load_images_from_individual_files==False & load_subset_of_images!=None:
     #    cprint("You cannot use a subset of data, when loading from images.pt", logfile)
@@ -164,7 +165,10 @@ def read_metadata_and_images(use_server_path = True, \
     #if metadata is sliced, then torch.load load can't be used. Instead, use images = load_images(...
     metadata_all = read_metadata(path + "metadata.csv") 
     if load_subset_of_images == None:
-        metadata = shuffle_metadata(metadata_all)
+        if shuffle == True:
+            metadata = shuffle_metadata(metadata_all)
+        else:
+            metadata = metadata_all        
         cprint("Using all metadata", logfile)
     else:
         metadata = shuffle_metadata(metadata_all)[:load_subset_of_images]
