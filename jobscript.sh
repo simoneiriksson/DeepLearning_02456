@@ -1,5 +1,5 @@
 #!/bin/sh
-#BSUB -q gpua100
+#BSUB -q gpuv100
 #BSUB -gpu "num=1"
 #BSUB -J myJob
 #BSUB -n 1

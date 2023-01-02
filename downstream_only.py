@@ -51,7 +51,7 @@ images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_pa
                                                         load_images_from_individual_files = False, 
                                                         load_subset_of_images = None, 
                                                         save_images_to_singlefile = False,
-                                                        shuffle = False
+                                                        shuffle = False,
                                                         logfile = logfile)
 # Settings for handing in:
 #images, metadata, mapping = read_metadata_and_images(use_server_path = True, \

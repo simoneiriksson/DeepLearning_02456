@@ -154,7 +154,7 @@ def read_metadata_and_images(use_server_path = True, \
                             load_images_from_individual_files = True, 
                             load_subset_of_images = None, 
                             save_images_to_singlefile = False,
-                            shuffle = True
+                            shuffle = True,
                             logfile = None):
     #if load_images_from_individual_files==False & load_subset_of_images!=None:
     #    cprint("You cannot use a subset of data, when loading from images.pt", logfile)
@@ -192,4 +192,4 @@ def read_metadata_and_images(use_server_path = True, \
     
     mapping = get_MOA_mappings(metadata) #sorts the metadata by moas
     cprint("loaded images", logfile)
-    return images, metadata, mapping
+    return images, metadata, metadata_all, mapping
