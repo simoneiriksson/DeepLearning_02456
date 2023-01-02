@@ -66,7 +66,7 @@ def initVAEmodel(params):
         vi = VariationalInference_VAE(beta=params['beta'], p_norm = p_norm)
         model = [vae]
 
-    elif model_type == 'Cyto_VAEGAN':
+    elif model_type == 'CytoVAEGAN':
         vae = CytoVariationalAutoencoder(params['image_shape'], params['latent_features'])
         disc = DISC(params['image_shape'], params['latent_features'])
         model = [vae, disc]

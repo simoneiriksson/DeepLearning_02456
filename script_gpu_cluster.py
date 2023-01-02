@@ -76,13 +76,11 @@ params = {
     'weight_decay' : 1e-3,
     'image_shape' : np.array([3, 68, 68]),
     'latent_features' : 256,
-    'model_type' : "SparseVAE",
-    'alpha': 0.05, 
-    'beta': 0.5, 
+    'model_type' : "CytoVAEGAN",
+#    'alpha': 0.2, 
+    'beta': 1.0, 
     'p_norm': 2.0
     }
-
-
 
 models, validation_data, training_data, params, vi = initVAEmodel(params)
 cprint("params: {}".format(params), logfile)
@@ -124,13 +122,14 @@ plot_VAE_performance(validation_data, file=output_folder + "images/validation_da
 cprint("Save VAE parameters", logfile)
 save_model(models, validation_data, training_data, params, output_folder)
 
-
-
 ########################################################
 #                                                      #
 #                 DOWNSTREAM TASKS                     #
 #                                                      #
 ########################################################
+
+del images
+
 images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
                                                         load_images_from_individual_files = False, 
                                                         load_subset_of_images = None, 
@@ -138,6 +137,7 @@ images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_pa
                                                         shuffle = False,
                                                         logfile = logfile)
 
+normalize_every_image_channels_seperately_inplace(images, verbose=True)
 downstream_task(vae, metadata, images, mapping, device, output_folder, logfile)
 
 cprint("output_folder is: {}".format(output_folder), logfile)

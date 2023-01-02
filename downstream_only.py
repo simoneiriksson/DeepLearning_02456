@@ -37,7 +37,12 @@ from VAEGAN_trainer import VAEGAN_trainer
 # choose correct output folder for LoadVAEmodel() below!!!
 #output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
 #output_folder = "./dump/outputs_2022-12-28 - 09-53-14/"
-output_folder = "./dump/outputs_2023-01-01 - 22-24-26/"
+#output_folder = "./dump/outputs_2023-01-01 - 22-24-26/"
+
+#output_folder = "./dump/outputs_2022-12-31 - 09-23-19_SparseVAE_beta1_alpha0.05_epochs100/"
+#output_folder = "./dump/outputs_2022-12-30 - 21-23-27_Cyto_nonvar_beta0_epochs100/"
+#output_folder = "./dump/outputs_2022-12-29 - 20-21-46-20230101T183446Z-001/"
+output_folder = "./dump/outputs_2022-12-31 - 14-22-48_SparseVAE_beta1_alpha0.2_epochs100/"
 
 
 constant_seed()
