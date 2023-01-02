@@ -131,8 +131,14 @@ save_model(models, validation_data, training_data, params, output_folder)
 #                 DOWNSTREAM TASKS                     #
 #                                                      #
 ########################################################
+images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
+                                                        load_images_from_individual_files = False, 
+                                                        load_subset_of_images = None, 
+                                                        save_images_to_singlefile = False,
+                                                        shuffle = False,
+                                                        logfile = logfile)
 
-downstream_task(vae, metadata_all, train_set, images, mapping, device, output_folder, logfile)
+downstream_task(vae, metadata, images, mapping, device, output_folder, logfile)
 
 cprint("output_folder is: {}".format(output_folder), logfile)
 cprint("script done.", logfile)

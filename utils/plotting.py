@@ -257,14 +257,11 @@ def heatmap(metadata_latent):
 
 
 
-    
-
-
 def extract_a_few_images(folder, vae, no_images, dataset, device, logfile=None):
     ######### extract a few images already #########
     n = no_images
     for i in range(n):
-        x, y = dataset[i]
+        x = dataset[i,:,:,:]
         plot_image_channels(x, file=folder + "/x_{}.png".format(i))
         x = x.to(device)
         outputs = vae(x[None,:,:,:])

@@ -22,7 +22,7 @@ from utils.profiling import NSC_NearestNeighbor_Classifier, moa_confusion_matrix
 from utils.profiling import treatment_profiles, treatment_center_cells
 from utils.plotting import plot_control_cell_to_target_cell
         
-def downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile=None):
+def downstream_task(vae, metadata, images, mapping, device, output_folder, logfile=None):
     cprint("Starting downstream tasks", logfile)
     #device = 'cpu'
     vae = vae.to(device)
@@ -30,7 +30,7 @@ def downstream_task(vae, metadata, train_set, images, mapping, device, output_fo
     _ = vae.eval() # because of batch normalization
 
     cprint("Extract a few images", logfile)
-    extract_a_few_images(output_folder + "images", vae=vae, no_images=10, dataset=train_set, device=device, logfile=logfile)
+    extract_a_few_images(output_folder + "images", vae=vae, no_images=10, dataset=images, device=device, logfile=logfile)
     cprint("saved images", logfile)
 
     #### CALCULATE LATENT REPRESENTATION FOR ALL IMAGES ####

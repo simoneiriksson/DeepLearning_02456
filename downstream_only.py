@@ -84,7 +84,7 @@ validation_loader = DataLoader(validation_set, batch_size=max(2, params['batch_s
 
 _ = vae.eval() # because of batch normalization
 
-downstream_task(vae, metadata, train_set, images, mapping, device, output_folder, logfile)
+downstream_task(vae, metadata, images, mapping, device, output_folder, logfile)
     
 cprint("output_folder is: {}".format(output_folder), logfile)
 cprint("script done.", logfile)
