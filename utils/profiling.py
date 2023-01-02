@@ -18,8 +18,8 @@ def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=
         start = batch_offset[j]
         end = batch_offset[j+1]
         image_subset = images[start:end,:,:,:]
-        outputs = vae(image_subset)
-        z = outputs["z"]
+        outputs = vae(image_subset.to(device))
+        z = outputs["z"].to('cpu')
         columns_list = ["latent_"+str(z) for z in range(z.shape[1])]
         z_df = pd.DataFrame(z.detach().numpy(), columns=columns_list)
         z_df.index = list(range(start,end))
@@ -34,8 +34,8 @@ def LatentVariableExtraction(metadata, images, batch_size, vae, device, logfile=
     if start != end:
         #print(start, end)
         image_subset = images[start:end,:,:,:]
-        outputs = vae(image_subset)
-        z = outputs["z"]
+        outputs = vae(image_subset.to(device))
+        z = outputs["z"].to('cpu')
         #print("z.shape", z.shape)
         columns_list = ["latent_"+str(z) for z in range(z.shape[1])]
         z_df = pd.DataFrame(z.detach().numpy(), columns=columns_list)
