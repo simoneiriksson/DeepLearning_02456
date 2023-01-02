@@ -6,11 +6,14 @@ import torch
 import math
 
 output_folder = "./dump/dump_megafile/"
+create_directory(output_folder)
 constant_seed()
+
 logfile = create_logfile(output_folder + "downstream_log.log")
 cprint("output_folder is: {}".format(output_folder), logfile)
 
 path = get_server_directory_path()
+path = '../data/all/'
 create_directory('../data/')
 metadata_all = read_metadata(path + "metadata.csv") 
 cprint("loading images from individual files", logfile)
