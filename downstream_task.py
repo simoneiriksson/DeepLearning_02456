@@ -44,8 +44,8 @@ def downstream_task(vae, metadata, images, mapping, device, output_folder, logfi
     create_directory(output_folder + "interpolations")
     #treatments list
     tl = metadata['Treatment'].sort_values().unique()
-    for treatment in [tl[0]]:
-    #for treatment in tl:
+    #for treatment in [tl[0]]:
+    for treatment in tl:
         filename = output_folder + "interpolations/" + treatment.replace('/', "_") + ".png"
         cprint(f"doing: {filename}", logfile)
         plot_control_cell_to_target_cell(treatment, images, metadata_latent, vae, device, file=filename,  control='DMSO_0.0', control_text = 'DMSO_0.0',  target_text=treatment)
