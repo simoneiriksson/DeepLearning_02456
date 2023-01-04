@@ -42,17 +42,18 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
-                                                        load_images_from_individual_files = False, 
+#images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
+#                                                        load_images_from_individual_files = False, 
+#                                                        load_subset_of_images = None, 
+#                                                        shuffle = True,
+#                                                        logfile = logfile)
+
+# Settings for handing in:
+images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
+                                                        load_images_from_individual_files = True, 
                                                         load_subset_of_images = None, 
-                                                        save_images_to_singlefile = False,
                                                         shuffle = True,
                                                         logfile = logfile)
-# Settings for handing in:
-#images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
-#                                                        load_images_from_individual_files = True, 
-#                                                        load_subset_of_images = None, 
-#                                                        save_images_to_singlefile = False)
 
 # With the below command, we normalize all the images, image- and channel-wise.
 # Alternative, this can be uncommented and like in the Lafarge article, we can do batchwise normalization
@@ -70,15 +71,15 @@ cprint("VAE Configs", logfile)
 # models to choose from: 'SparseVAEGAN', 'CytoVAEGAN', 'CytoVAE', 'SparseVAE'
 # start another training session
 params = {
-    'num_epochs' : 2,
+    'num_epochs' : 50,
     'batch_size' : min(64, len(train_set)),
     'learning_rate' : 1e-3,
     'weight_decay' : 1e-3,
     'image_shape' : np.array([3, 68, 68]),
     'latent_features' : 256,
-    'model_type' : "CytoVAEGAN",
-#    'alpha': 0.2, 
-    'beta': 1.0, 
+    'model_type' : "SparseVAEGAN",
+    'alpha': 0.1, 
+    'beta': 0.0, 
     'p_norm': 2.0
     }
 

@@ -59,7 +59,7 @@ def downstream_task(vae, metadata, images, mapping, device, output_folder, logfi
     heatmap_res = heatmap_res.reindex(sorted_columns , axis=1)
     # plot heatmap
     plt.figure(figsize = (8,4))
-    heat = sns.heatmap(heatmap_res, vmin=0, vmax=0.5)#.set(xticklabels=[])
+    heat = sns.heatmap(heatmap_res, vmin=0, vmax=0.3)#.set(xticklabels=[])
     figure = heat.get_figure()
     plt.gcf()
     figure.savefig(output_folder + "images/latent_var_heatmap.png", bbox_inches = 'tight')
@@ -71,6 +71,7 @@ def downstream_task(vae, metadata, images, mapping, device, output_folder, logfi
 
     #### PLOT CONFUSION MATRIX ####
     confusion_matrix = moa_confusion_matrix(targets, predictions)
+    cprint(confusion_matrix, logfile)
     df_cm = pd.DataFrame(confusion_matrix/np.sum(confusion_matrix) *100, index = [i for i in mapping],
                             columns = [i for i in mapping])
     plt.figure(figsize = (12,7))
