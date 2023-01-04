@@ -45,6 +45,7 @@ cprint(f"Using device: {device}", logfile)
 #images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
 #                                                        load_images_from_individual_files = False, 
 #                                                        load_subset_of_images = None, 
+#                                                        save_images_to_singlefile = False,
 #                                                        shuffle = True,
 #                                                        logfile = logfile)
 
@@ -52,6 +53,7 @@ cprint(f"Using device: {device}", logfile)
 images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
                                                         load_images_from_individual_files = True, 
                                                         load_subset_of_images = None, 
+                                                        save_images_to_singlefile = False,
                                                         shuffle = True,
                                                         logfile = logfile)
 
@@ -79,7 +81,7 @@ params = {
     'latent_features' : 256,
     'model_type' : "SparseVAEGAN",
     'alpha': 0.1, 
-    'beta': 0.0, 
+    'beta': 1.0, 
     'p_norm': 2.0
     }
 
@@ -131,8 +133,16 @@ save_model(models, validation_data, training_data, params, output_folder)
 
 del images
 
-images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
-                                                        load_images_from_individual_files = False, 
+#images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
+#                                                        load_images_from_individual_files = False, 
+#                                                        load_subset_of_images = None, 
+#                                                        save_images_to_singlefile = False,
+#                                                        shuffle = False,
+#                                                        logfile = logfile)
+
+# Settings for handing in:
+images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
+                                                        load_images_from_individual_files = True, 
                                                         load_subset_of_images = None, 
                                                         save_images_to_singlefile = False,
                                                         shuffle = False,
