@@ -35,17 +35,10 @@ from VAEGAN_trainer import VAEGAN_trainer
 
 ######### Utilities #########
 # choose correct output folder for LoadVAEmodel() below!!!
-#output_folder = "./dump/outputs_2022-12-28 - 09-40-32/"
-#output_folder = "./dump/outputs_2022-12-28 - 09-53-14/"
-#output_folder = "./dump/outputs_2023-01-01 - 22-24-26/"
+#output_folder = "./dump/outputs_2023-01-02 - 19-35-10/"
 
-#output_folder = "./dump/outputs_2022-12-31 - 09-23-19_SparseVAE_beta1_alpha0.05_epochs100/"
-#output_folder = "./dump/outputs_2022-12-30 - 21-23-27_Cyto_nonvar_beta0_epochs100/"
-#output_folder = "./dump/outputs_2022-12-29 - 20-21-46-20230101T183446Z-001/"
-#output_folder = "./dump/outputs_2022-12-31 - 14-22-48_SparseVAE_beta1_alpha0.2_epochs100/"
 #output_folder = "./dump/outputs_2023-01-02 - 18-47-44/"
 #output_folder = "./dump/outputs_2023-01-02 - 19-35-44/"
-#output_folder = "./dump/outputs_2023-01-02 - 19-35-10/"
 #output_folder = "./dump/outputs_2023-01-02 - 20-02-52_CytoVAE_beta0_epochs50/"
 #output_folder = "./dump/outputs_2023-01-02 - 20-10-36_SparseVAE_beta1_alpha0.05_epochs50/"
 #output_folder = "./dump/outputs_2023-01-02 - 20-08-32_SparseVAE_beta1_alpha0.2_epochs50/"
@@ -54,12 +47,12 @@ from VAEGAN_trainer import VAEGAN_trainer
 #output_folder = "./dump/outputs_2023-01-02 - 20-22-11/"
 #output_folder = "./dump/outputs_2023-01-02 - 19-38-25/"
 
-#output_folder = "./dump/"
-#####
-#output_folder = "./dump/outputs_2023-01-02 - 19-35-44/" 
-output_folder = "./dump/outputs_2023-01-02 - 19-35-10/" 
 #output_folder = "./dump/outputs_2023-01-02 - 21-17-12/"
-#output_folder = "./dump/outputs_2023-01-02 - 18-47-44/"
+#output_folder = "./dump/outputs_2023-01-03 - 08-38-53_SparseVAE_beta1_alpha0.3_epochs50/" # findes ej
+#output_folder = "./dump/outputs_2023-01-03 - 08-33-46_SparseVAE_beta1_alpha0.9_epochs50/" # findes ej
+#output_folder = "./dump/outputs_2023-01-03 - 08-34-13_SparseVAEGAN_beta1_alpha0.9_epochs50/" # findes ej
+
+output_folder = "./dump/outputs_2023-01-03 - 17-00-15/"
 
 constant_seed()
 logfile = create_logfile(output_folder + "downstream_log.log")
@@ -68,21 +61,21 @@ cprint("output_folder is: {}".format(output_folder), logfile)
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cprint(f"Using device: {device}", logfile)
 
-#images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
-#                                                        load_images_from_individual_files = False, 
-#                                                        load_subset_of_images = None, 
-#                                                        save_images_to_singlefile = False,
-#                                                        shuffle = False,
-#                                                        logfile = logfile)
-
-# Settings for handing in:
-images, metadata, mapping = read_metadata_and_images(use_server_path = True, \
-                                                        load_images_from_individual_files = True, 
+images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
+                                                        load_images_from_individual_files = False, 
                                                         load_subset_of_images = None, 
                                                         save_images_to_singlefile = False,
                                                         shuffle = False,
                                                         logfile = logfile)
-                                                        )
+
+# Settings for handing in:
+#images, metadata, metadata_all, mapping = read_metadata_and_images(use_server_path = True, \
+#                                                        load_images_from_individual_files = True, 
+#                                                        load_subset_of_images = None, 
+#                                                        save_images_to_singlefile = False,
+#                                                        shuffle = False,
+#                                                        logfile = logfile)
+#                                                        )
 
 # With the below command, we normalize all the images, image- and channel-wise.
 # Alternative, this can be uncommented and like in the Lafarge article, we can do batchwise normalization
